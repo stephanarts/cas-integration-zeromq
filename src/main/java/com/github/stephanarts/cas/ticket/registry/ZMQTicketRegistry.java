@@ -97,7 +97,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
 
         this.context = ZMQ.context(1);
 
-        this.provider = new Provider(this.context, bindUri);
+        this.provider = new Provider(bindUri);
 
         this.provider.start();
 

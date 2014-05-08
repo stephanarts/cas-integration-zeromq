@@ -71,7 +71,7 @@ class Provider extends Thread {
      *  @param context    ZeroMQ Context
      *  @param bindUri    BindURI
      */
-    public Provider(final Context context, final String bindUri) {
+    public Provider(final String bindUri) {
 
         this.context = ZMQ.context(1);
 
@@ -121,7 +121,7 @@ class Provider extends Thread {
 
                     try {
 
-                        if(requestMethod.equals("del")) {
+                        if(requestMethod.equals("delete")) {
                             logger.debug("Delete Ticket");
 
                             ticketId = requestParams.getString("ticket-id");
