@@ -126,7 +126,7 @@ class Provider extends Thread {
 
                             ticketId = requestParams.getString("ticket-id");
 
-                            if(!this.map.containsKey(ticket.hashCode())) {
+                            if(!this.map.containsKey(ticketId.hashCode())) {
                                 logger.warn("Missing Key {}", ticketId);
                             }
 

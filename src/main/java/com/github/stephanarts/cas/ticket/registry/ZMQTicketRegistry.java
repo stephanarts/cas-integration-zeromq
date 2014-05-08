@@ -237,6 +237,15 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
     public boolean deleteTicket(final String ticketId) {
         logger.debug("Deleting ticket {}", ticketId);
 
+        String hostname;
+
+        JSONObject request = new JSONObject();
+        JSONObject requestParams = new JSONObject();
+        JSONObject response;
+        JSONObject result;
+
+        Socket socket;
+
         request.put("json-rpc", "2.0");
         request.put("id", "41");
         request.put("method", "delete");
