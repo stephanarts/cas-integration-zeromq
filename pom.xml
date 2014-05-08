@@ -28,7 +28,7 @@
 <groupId>com.github.stephanarts</groupId>
 <artifactId>cas-server-integration-zeromq</artifactId>
 <packaging>jar</packaging>
-<version>0.0.1-SNAPSHOT</version>
+<version>0.0.1</version>
 <name>ZeroMQ Integration for Jasig CAS</name>
 
 <repositories>
@@ -67,12 +67,12 @@
   <properties>
     <cs.dir>${project.parent.basedir}</cs.dir>
     <
-  </properties>
+ </properties>
   -->
 
     <scm>
-        <connection>scm:git:git@github.com:stephanarts/cas-integration-zeromq.git</connection>
-        <url>https://github.com/stephanarts/cas-integration-zeromq</url>
+        <connection>scm:git:git@github.com:stephanarts/cas-integration-zeromq.git/tags/cas-server-integration-zeromq-0.0.1</connection>
+        <url>https://github.com/stephanarts/cas-integration-zeromq/tags/cas-server-integration-zeromq-0.0.1</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -105,7 +105,65 @@
                </dependency>
             </dependencies>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>2.0.9</version>
+                </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>${project.build.sourceVersion}</version>
+                </requireJavaVersion>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>cglib:cglib</exclude>
+                    <exclude>cglib:cglib-full</exclude>
+                  </excludes>
+                  <includes>
+                    <include>cglib:cglib:provided</include>
+                    <include>cglib:cglib-full:provided</include>
+                  </includes>
+                  <searchTransitive>true</searchTransitive>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${project.build.sourceVersion}</source>
+          <target>${project.build.targetVersion}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
    </plugins>
    </build>
+
+  <properties>
+    <project.build.sourceVersion>1.6</project.build.sourceVersion>
+    <project.build.targetVersion>1.6</project.build.targetVersion>
+  </properties>
 
 </project>
