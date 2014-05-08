@@ -21,11 +21,16 @@ package com.github.stephanarts.cas.ticket.registry;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import junit.framework.Assert;
 
 import org.jasig.cas.ticket.Ticket;
 import org.jasig.cas.ticket.ServiceTicket;
 
 import com.github.stephanarts.cas.ticket.registry.ZMQTicketRegistry;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 /**
  * Unit test for ZMQTicketRegistry.
@@ -51,14 +56,19 @@ public class ZMQTicketRegistryTest
         return new TestSuite( ZMQTicketRegistryTest.class );
     }
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
+    public void testWriteGetDelete() throws Exception {
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket.getId()).thenReturn(ticketId);
         String[] addresses = {"tcp://localhost:5555"};
-        ZMQTicketRegistry z = new ZMQTicketRegistry(addresses,"tcp://localhost:5555", 30, 30);
+        ZMQTicketRegistry registry = new ZMQTicketRegistry(addresses,"tcp://localhost:5555", 30, 30);
 
-        assertTrue( true );
+        registry.addTicket(ticket);
+
+        final ServiceTicket ticketFromRegistry = (ServiceTicket) registry.getTicket(ticketId);
+        Assert.assertNotNull(ticketFromRegistry);
+        Assert.assertEquals(ticketId, ticketFromRegistry.getId());
+        registry.deleteTicket(ticketId);
+        Assert.assertNull(registry.getTicket(ticketId));
     }
 }
