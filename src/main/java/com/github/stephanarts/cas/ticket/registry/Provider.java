@@ -68,7 +68,6 @@ class Provider extends Thread {
     /**
      *  Create a RegistryProvider.
      *
-     *  @param context    ZeroMQ Context
      *  @param bindUri    BindURI
      */
     public Provider(final String bindUri) {
