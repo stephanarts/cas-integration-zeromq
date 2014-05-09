@@ -27,12 +27,11 @@ import org.slf4j.LoggerFactory;
 //import org.json.JSONObject;
 
 import org.zeromq.ZMQ;
-//import org.zeromq.ZMsg;
+import org.zeromq.ZMsg;
 import org.zeromq.ZMQ.Context;
 import org.zeromq.ZMQ.Socket;
-
 //import org.zeromq.ZMQ.PollItem;
-//import org.zeromq.ZMQ.Poller;
+import org.zeromq.ZMQ.Poller;
 
 /**
  * JSONRPCServer Class.
@@ -54,6 +53,11 @@ class JSONRPCServer extends Thread {
      */
     private final Socket  socket;
 
+    /**
+     * BindURI.
+     */
+    private final String  bindUri;
+
 
     /**
      * Hashmap of Methods.
@@ -72,6 +76,8 @@ class JSONRPCServer extends Thread {
 
         this.socket = this.context.socket(ZMQ.ROUTER);
 
+        this.bindUri = bindUri;
+
         this.setName("JSONRPCServer");
 
         this.methodMap = new HashMap<String, IMethod>();
@@ -83,12 +89,21 @@ class JSONRPCServer extends Thread {
      *
      * @param name                    Method Name.
      * @param method                  Method Class
-     * @throws JSONRPCServerException Exception
+     * @throws JSONRPCException       Exception
      */
     public void registerMethod(
             final String  name,
-            final IMethod method) throws JSONRPCServerException {
-        throw new JSONRPCServerException();
+            final IMethod method) throws JSONRPCException {
+
+        /**
+         * Check if a method with this name is already
+         * registered.
+         */
+        if(this.methodMap.containsKey(name)) {
+            throw new JSONRPCException();
+        }
+
+        this.methodMap.put(name, method);
     }
 
     /**
@@ -96,8 +111,22 @@ class JSONRPCServer extends Thread {
      */
     public void run() {
 
-//        while(!Thread.currentThread().isInterrupted()) {
-//        }
+        ZMsg message;
 
+        Poller items = new Poller(1);
+
+        /** Bind Socket */
+        this.socket.bind(this.bindUri);
+
+        items.register(this.socket, Poller.POLLIN);
+
+        /** Enter the main event-loop */
+        while(!Thread.currentThread().isInterrupted()) {
+            items.poll();
+
+            if(items.pollin(0)) {
+                message = ZMsg.recvMsg(socket);
+            }
+        }
     }
 }

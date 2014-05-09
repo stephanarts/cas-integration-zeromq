@@ -20,7 +20,7 @@
 package com.github.stephanarts.cas.ticket.registry.support;
 
 /**
- * JSONRPCServerException Class.
+ * JSONRPCException Class.
  */
-class JSONRPCServerException extends Exception {
+class JSONRPCException extends Exception {
 }
