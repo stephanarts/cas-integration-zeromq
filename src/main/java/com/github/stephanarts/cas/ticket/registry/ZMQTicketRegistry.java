@@ -102,20 +102,6 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
         this.provider.start();
 
         this.hostnames = providers;
-/*
-        Socket socket;
-        String hostname;
-
-        for(int i = 0; i < this.hostnames.length; ++i)
-        {
-            hostname = this.hostnames[i];
-
-            socket = this.context.socket(ZMQ.REQ);
-            socket.connect(hostname);
-            socket.send("{}",0);
-            socket.close();
-        }
-*/
     }
 
     /**
@@ -214,7 +200,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
                     // We got a reply from the server, must match sequence
                     ZMsg message = ZMsg.recvMsg(socket);
                     response = new JSONObject(new String(message.getLast().getData()));
-                    result = response .getJSONObject("result");
+                    result = response.getJSONObject("result");
                     socket.close();
                     return;
                 } else {
