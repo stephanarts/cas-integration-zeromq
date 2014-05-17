@@ -32,7 +32,6 @@ import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMsg;
 
-import com.github.stephanarts.cas.ticket.registry.support.JSONRPCServer;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 
 /*
@@ -42,81 +41,38 @@ import static org.mockito.Mockito.withSettings;
 */
 
 /**
- * Unit test for JSONRPCServer.
+ * Unit test for JSONRPCException.
  */
-public class JSONRPCServerTest
+public class JSONRPCExceptionTest
     extends TestCase
 {
-
-    private JSONRPCServer server;
-
-    private Context context;
-
-    private class TestMethod implements IMethod {
-        public JSONObject execute(JSONObject params) {
-            return new JSONObject();
-        }
-    }
-
     /**
      * Create the test case
      *
      * @param testName name of the test case
      */
-    public JSONRPCServerTest( String testName ) {
+    public JSONRPCExceptionTest( String testName ) {
         super( testName );
-        this.context = ZMQ.context(1);
     }
 
     /**
      * @return the suite of tests being tested
      */
     public static Test suite() {
-        return new TestSuite( JSONRPCServerTest.class );
+        return new TestSuite( JSONRPCExceptionTest.class );
     }
 
-    protected void setUp() {
-        this.server = new JSONRPCServer("tcp://localhost:6789");
-        this.server.start();
-    }
-
-    protected void tearDown() {
-        this.server.stop();
-    }
-
-    public void testRegisterMethod() throws Exception {
-        boolean testcase_1 = false;
-        boolean testcase_2 = false;
-        boolean testcase_3 = false;
+    public void testJSONRPCException() throws Exception {
+        boolean exception_thrown = false;
 
         try {
-            this.server.registerMethod("test", new TestMethod());
-            testcase_1 = true;
+            throw new JSONRPCException(-31600, "Invalid Request");
         } catch (JSONRPCException e) {
-            testcase_1 = false;
+            exception_thrown = true;
+            Assert.assertEquals(e.getCode(), -31600);
+            Assert.assertTrue(e.getMessage().equals("Invalid Request"));
         }
 
-        Assert.assertTrue(testcase_1);
-
-        try {
-            this.server.registerMethod("test", new TestMethod());
-            testcase_2 = true;
-        } catch (JSONRPCException e) {
-            testcase_2 = false;
-        }
-
-        Assert.assertFalse(testcase_2);
-
-        try {
-            this.server.registerMethod("test-a", new TestMethod());
-            testcase_3 = true;
-        } catch (JSONRPCException e) {
-            testcase_3 = false;
-        }
-
-        Assert.assertTrue(testcase_3);
-    }
-
-    public void testNotification() throws Exception {
+        Assert.assertTrue(exception_thrown);
     }
 }

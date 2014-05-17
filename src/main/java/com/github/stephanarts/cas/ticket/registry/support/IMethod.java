@@ -29,8 +29,11 @@ interface IMethod {
     /**
      * Execute the JSONRPCFunction.
      *
+     * @throws JSONRPCException
      * @param params    JSONRPC Method Parameters.
+     *
+     * @return          JSONRPC result object
      */
-    void execute(JSONObject params);
+    JSONObject execute(JSONObject params) throws JSONRPCException;
 
 }

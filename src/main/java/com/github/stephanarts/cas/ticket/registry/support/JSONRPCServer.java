@@ -24,10 +24,12 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import org.json.JSONObject;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
+import org.zeromq.ZFrame;
 import org.zeromq.ZMQ.Context;
 import org.zeromq.ZMQ.Socket;
 //import org.zeromq.ZMQ.PollItem;
@@ -100,7 +102,7 @@ class JSONRPCServer extends Thread {
          * registered.
          */
         if(this.methodMap.containsKey(name)) {
-            throw new JSONRPCException();
+            throw new JSONRPCException(-1, "Method already registered");
         }
 
         this.methodMap.put(name, method);
@@ -111,9 +113,26 @@ class JSONRPCServer extends Thread {
      */
     public void run() {
 
-        ZMsg message;
+        ZMsg   message;
+        ZFrame body;
+        String msg;
+
+        JSONObject request;
+
+        String methodName;
+        String methodId = null;
+
+        JSONObject params;
+
+        IMethod    method;
+
+        JSONObject response = new JSONObject();
+        JSONObject result;
+        JSONObject error;
 
         Poller items = new Poller(1);
+
+        response.put("jsonrpc", "2.0");
 
         /** Bind Socket */
         this.socket.bind(this.bindUri);
@@ -126,6 +145,131 @@ class JSONRPCServer extends Thread {
 
             if(items.pollin(0)) {
                 message = ZMsg.recvMsg(socket);
+                body = message.getLast();
+                msg = new String(body.getData());
+
+                response.remove("id");
+                response.remove("error");
+                response.remove("result");
+
+                try {
+                    request = new JSONObject(msg);
+                    if(!request.has("json-rpc")) {
+                        /**
+                         * code = -32600
+                         * msg = Invalid Request
+                         */
+                        throw new JSONRPCException(
+                                -32600,
+                                "Invalid Request");
+                    } else {
+                        if(!request.getString("json-rpc").equals("2.0")) {
+                            /**
+                             * code = -32600
+                             * msg = Invalid Request
+                             */
+                            throw new JSONRPCException(
+                                    -32600,
+                                    "Invalid Request");
+                        }
+
+                    }
+
+                    /**
+                     * Get the methodId, required for sending a response.
+                     */
+                    methodId = request.getString("id");
+
+                    if(!request.has("params")) {
+                        /**
+                         * code = -32600
+                         * msg = Invalid Request
+                         */
+                        throw new JSONRPCException(
+                                -32600,
+                                "Invalid Request");
+                    }
+
+                    /**
+                     * We only support named params at the moment.
+                     */
+                    params = request.getJSONObject("params");
+                    if(params == null) {
+                        /**
+                         * code = -32600
+                         * msg = Invalid Request
+                         */
+                        throw new JSONRPCException(
+                                -32600,
+                                "Invalid Request");
+                    }
+
+                    if(!request.has("method")) {
+                        /**
+                         * code = -32600
+                         * msg = Invalid Request
+                         */
+                        throw new JSONRPCException(
+                                -32600,
+                                "Invalid Request");
+                    } else {
+                        methodName = request.getString("method");
+                        if (!this.methodMap.containsKey(methodName)) {
+                            /**
+                             * code = -32601
+                             * msg = Method not Found
+                             */
+                            throw new JSONRPCException(
+                                    -32601,
+                                    "Method not Found");
+                        }
+
+                        method = this.methodMap.get(methodName);
+                        if (method == null) {
+                            /**
+                             * code = -32601
+                             * msg = Method not Found
+                             */
+                            throw new JSONRPCException(
+                                    -32601,
+                                    "Method not Found");
+                        }
+
+                        result = method.execute(params);
+
+                        if(methodId != null) {
+                            response.put("id", methodId);
+                            response.put("result", result);
+                        }
+                    }
+                } catch (final JSONException e) {
+                    if(methodId != null) {
+                        response.put("id", methodId);
+
+                        error = new JSONObject();
+                        response.put("error", error);
+                        error.put("code", -32700);
+                        error.put("message", "Parse Error");
+                    }
+                } catch (final JSONRPCException e) {
+                    if(methodId != null) {
+                        response.put("id", methodId);
+
+                        error = new JSONObject();
+                        response.put("error", error);
+                        error.put("code", e.getCode());
+                        error.put("message", e.getMessage());
+                    }
+                } catch (final Exception e) {
+                    if(methodId != null) {
+                        response.put("id", methodId);
+
+                        error = new JSONObject();
+                        response.put("error", error);
+                        error.put("code", -32603);
+                        error.put("message", "Internal error");
+                    }
+                }
             }
         }
     }
