@@ -125,7 +125,7 @@ class JSONRPCServer extends Thread {
     /**
      * Run the server.
      */
-    public void run() {
+    public final void run() {
 
         ZMsg   message;
         ZFrame body;
