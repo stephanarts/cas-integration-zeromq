@@ -67,7 +67,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
      */
     private final Context context;
 
-    private final Provider provider;
+    private final ZMQProvider provider;
 
     private final String[] hostnames;
 
@@ -93,7 +93,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
 
         this.context = ZMQ.context(1);
 
-        this.provider = new Provider(bindUri);
+        this.provider = new ZMQProvider(bindUri);
 
         this.provider.start();
 
