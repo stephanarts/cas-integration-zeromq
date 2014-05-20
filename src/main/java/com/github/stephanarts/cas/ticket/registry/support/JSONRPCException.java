@@ -18,7 +18,7 @@ package com.github.stephanarts.cas.ticket.registry.support;
 /**
  * JSONRPCException Class.
  */
-class JSONRPCException extends Exception {
+public class JSONRPCException extends Exception {
 
     /**
      * Numeric JSON-RPC Error-code.
@@ -28,7 +28,7 @@ class JSONRPCException extends Exception {
     /**
      * Verbose JSON-RPC Error-message.
      */
-    private String message;
+    private final String message;
 
     /**
      * Create a JSONRPCException object.
@@ -48,7 +48,7 @@ class JSONRPCException extends Exception {
      *
      * @return         int containing numeric JSON-RPC error-code.
      */
-    public int getCode() {
+    public final int getCode() {
         return this.code;
     }
 
@@ -57,7 +57,7 @@ class JSONRPCException extends Exception {
      *
      * @return         String containing JSON-RPC error-message.
      */
-    public String getMessage() {
+    public final String getMessage() {
         return this.message;
     }
 }

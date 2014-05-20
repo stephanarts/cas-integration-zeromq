@@ -20,7 +20,7 @@ import org.json.JSONObject;
 /**
  * IMethod Interface.
  */
-interface IMethod {
+public interface IMethod {
 
     /**
      * Execute the JSONRPCFunction.

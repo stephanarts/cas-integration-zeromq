@@ -34,7 +34,7 @@ import org.zeromq.ZMQ.Poller;
 /**
  * JSONRPCServer Class.
  */
-class JSONRPCServer extends Thread {
+public class JSONRPCServer extends Thread {
 
     /**
      * Logging Class.
@@ -103,7 +103,7 @@ class JSONRPCServer extends Thread {
      * @param method                  Method Class
      * @throws JSONRPCException       Exception
      */
-    public void registerMethod(
+    public final void registerMethod(
             final String  name,
             final IMethod method) throws JSONRPCException {
 
@@ -169,6 +169,7 @@ class JSONRPCServer extends Thread {
 
             /**
              * TODO
+             *
              * Don't assume indexes, properly use the ones returned
              * by the items.register function.
              */
@@ -283,7 +284,7 @@ class JSONRPCServer extends Thread {
      * Batch calls or array-style parameters are not supported.
      *
      */
-    protected void validateJSONRPC(final JSONObject request) throws JSONRPCException {
+    protected final void validateJSONRPC(final JSONObject request) throws JSONRPCException {
 
         JSONObject params;
 
@@ -352,7 +353,7 @@ class JSONRPCServer extends Thread {
      * NOTE:
      * Maybe, doing this in the interrupt call is not a good idea.
      */
-    public void interrupt() {
+    public final void interrupt() {
         byte[] msg = new byte[1];
         Socket s = this.context.socket(ZMQ.PUSH);
         s.connect("inproc://jsonrpc-"+this.nr);
@@ -368,7 +369,7 @@ class JSONRPCServer extends Thread {
      * Binds the sockets before calling Thread.start(), this way
      * they are already bound before the first run() is executed.
      */
-    public void start() {
+    public final void start() {
         /** Bind Socket */
         logger.debug("Binding Sockets ["+this.nr+"]");
         this.socket.bind(this.bindUri);
