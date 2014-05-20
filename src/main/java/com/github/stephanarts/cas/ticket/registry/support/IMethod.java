@@ -29,10 +29,11 @@ interface IMethod {
     /**
      * Execute the JSONRPCFunction.
      *
-     * @throws JSONRPCException
      * @param params    JSONRPC Method Parameters.
      *
      * @return          JSONRPC result object
+     *
+     * @throws JSONRPCException implementors can throw JSONRPCExceptions containing the error.
      */
     JSONObject execute(JSONObject params) throws JSONRPCException;
 

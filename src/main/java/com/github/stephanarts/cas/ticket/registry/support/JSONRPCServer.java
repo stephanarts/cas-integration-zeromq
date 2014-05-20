@@ -56,6 +56,12 @@ class JSONRPCServer extends Thread {
     private final Socket  socket;
 
     /**
+     * ZMQ Control Socket.
+     */
+    private final Socket  controlSocket;
+
+
+    /**
      * BindURI.
      */
     private final String  bindUri;
@@ -65,6 +71,10 @@ class JSONRPCServer extends Thread {
      * Hashmap of Methods.
      */
     private final HashMap<String, IMethod> methodMap;
+
+    private static int NR = 0;
+
+    private final int nr;
 
 
     /**
@@ -77,6 +87,7 @@ class JSONRPCServer extends Thread {
         this.context = ZMQ.context(1);
 
         this.socket = this.context.socket(ZMQ.ROUTER);
+        this.controlSocket = this.context.socket(ZMQ.PULL);
 
         this.bindUri = bindUri;
 
@@ -84,6 +95,9 @@ class JSONRPCServer extends Thread {
 
         this.methodMap = new HashMap<String, IMethod>();
 
+        this.NR++;
+
+        this.nr = this.NR;
     }
 
     /**
@@ -128,21 +142,47 @@ class JSONRPCServer extends Thread {
 
         JSONObject response = new JSONObject();
         JSONObject result;
-        JSONObject error;
+        JSONObject error = null;
 
-        Poller items = new Poller(1);
+        Poller items = new Poller(2);
 
         response.put("jsonrpc", "2.0");
 
-        /** Bind Socket */
-        this.socket.bind(this.bindUri);
-
+        /** Enter the main event-loop */
         items.register(this.socket, Poller.POLLIN);
+        int i = items.register(this.controlSocket, Poller.POLLIN);
 
+        logger.debug("Registered controlSocket as item: "+i);
+
+        logger.debug("Entering main event-loop ["+this.nr+"]");
         /** Enter the main event-loop */
         while(!Thread.currentThread().isInterrupted()) {
             items.poll();
+            logger.debug("["+this.nr+"] - got input");
+            for(int a = 0; a < items.getSize(); ++a) {
+                if(items.pollin(a)) {
+                    logger.debug("Input on :"+a);
+                }
+                if(items.pollout(a)) {
+                    logger.debug("output on :"+a);
+                }
+                if(items.pollerr(a)) {
+                    logger.debug("error on :"+a);
+                }
+            }
 
+            /**
+             * TODO
+             * Don't assume indexes, properly use the ones returned
+             * by the items.register function.
+             */
+            if(items.pollin(1)) {
+                message = ZMsg.recvMsg(controlSocket);
+                logger.debug("Received STOP message [" + this.nr + "]");
+                this.socket.close();
+                this.context.close();
+                return;
+            }
             if(items.pollin(0)) {
                 message = ZMsg.recvMsg(socket);
                 body = message.getLast();
@@ -152,125 +192,193 @@ class JSONRPCServer extends Thread {
                 response.remove("error");
                 response.remove("result");
 
+                logger.debug("Got a message");
+
                 try {
                     request = new JSONObject(msg);
-                    if(!request.has("json-rpc")) {
-                        /**
-                         * code = -32600
-                         * msg = Invalid Request
-                         */
-                        throw new JSONRPCException(
-                                -32600,
-                                "Invalid Request");
-                    } else {
-                        if(!request.getString("json-rpc").equals("2.0")) {
-                            /**
-                             * code = -32600
-                             * msg = Invalid Request
-                             */
-                            throw new JSONRPCException(
-                                    -32600,
-                                    "Invalid Request");
-                        }
 
-                    }
+                    validateJSONRPC(request);
 
                     /**
                      * Get the methodId, required for sending a response.
                      */
                     methodId = request.getString("id");
 
-                    if(!request.has("params")) {
+                    methodName = request.getString("method");
+                    if (!this.methodMap.containsKey(methodName)) {
                         /**
-                         * code = -32600
-                         * msg = Invalid Request
+                         * code = -32601
+                         * msg = Method not Found
                          */
                         throw new JSONRPCException(
-                                -32600,
-                                "Invalid Request");
+                                -32601,
+                                "Method not Found");
                     }
 
-                    /**
-                     * We only support named params at the moment.
-                     */
+                    method = this.methodMap.get(methodName);
+                    if (method == null) {
+                        /**
+                         * code = -32601
+                         * msg = Method not Found
+                         */
+                        throw new JSONRPCException(
+                                -32601,
+                                "Method not Found");
+                    }
+
                     params = request.getJSONObject("params");
-                    if(params == null) {
-                        /**
-                         * code = -32600
-                         * msg = Invalid Request
-                         */
-                        throw new JSONRPCException(
-                                -32600,
-                                "Invalid Request");
-                    }
 
-                    if(!request.has("method")) {
-                        /**
-                         * code = -32600
-                         * msg = Invalid Request
-                         */
-                        throw new JSONRPCException(
-                                -32600,
-                                "Invalid Request");
-                    } else {
-                        methodName = request.getString("method");
-                        if (!this.methodMap.containsKey(methodName)) {
-                            /**
-                             * code = -32601
-                             * msg = Method not Found
-                             */
-                            throw new JSONRPCException(
-                                    -32601,
-                                    "Method not Found");
-                        }
+                    result = method.execute(params);
 
-                        method = this.methodMap.get(methodName);
-                        if (method == null) {
-                            /**
-                             * code = -32601
-                             * msg = Method not Found
-                             */
-                            throw new JSONRPCException(
-                                    -32601,
-                                    "Method not Found");
-                        }
-
-                        result = method.execute(params);
-
-                        if(methodId != null) {
-                            response.put("id", methodId);
-                            response.put("result", result);
-                        }
+                    if(methodId != null) {
+                        response.put("id", methodId);
+                        response.put("result", result);
                     }
                 } catch (final JSONException e) {
-                    if(methodId != null) {
-                        response.put("id", methodId);
+                    response.put("id", methodId);
 
-                        error = new JSONObject();
-                        response.put("error", error);
-                        error.put("code", -32700);
-                        error.put("message", "Parse Error");
-                    }
+                    error = new JSONObject();
+                    response.put("error", error);
+                    error.put("code", -32700);
+                    error.put("message", "Parse error");
+                    logger.warn("Parse error");
                 } catch (final JSONRPCException e) {
-                    if(methodId != null) {
-                        response.put("id", methodId);
+                    response.put("id", methodId);
 
-                        error = new JSONObject();
-                        response.put("error", error);
-                        error.put("code", e.getCode());
-                        error.put("message", e.getMessage());
-                    }
+                    error = new JSONObject();
+                    response.put("error", error);
+                    error.put("code", e.getCode());
+                    error.put("message", e.getMessage());
+                    logger.warn(e.getMessage());
                 } catch (final Exception e) {
-                    if(methodId != null) {
-                        response.put("id", methodId);
+                    response.put("id", methodId);
 
-                        error = new JSONObject();
-                        response.put("error", error);
-                        error.put("code", -32603);
-                        error.put("message", "Internal error");
-                    }
+                    error = new JSONObject();
+                    response.put("error", error);
+                    error.put("code", -32603);
+                    error.put("message", "Internal error");
+                    logger.warn("Internal error");
                 }
+
+                if (methodId != null || error != null) {
+                    logger.debug("Sent a reply");
+                    message.removeLast();
+                    message.addString(response.toString());
+                    message.send(this.socket);
+                }
+
             }
         }
+
+        logger.debug("Closing context ["+this.nr+"]");
+        this.controlSocket.close();
+        this.socket.close();
+        this.context.close();
+    }
+
+    /**
+     * Validate JSONRPC call.
+     *
+     * @param  request    JSONRPC request object
+     *
+     * @throws JSONRPCException Throws exception if request object contains
+     * malformed or unsupported json-rpc
+     *
+     * Batch calls or array-style parameters are not supported.
+     *
+     */
+    protected void validateJSONRPC(final JSONObject request) throws JSONRPCException {
+
+        JSONObject params;
+
+        JSONObject method;
+
+        if(!request.has("json-rpc")) {
+            /**
+             * code = -32600
+             * msg = Invalid Request
+             */
+            throw new JSONRPCException(
+                    -32600,
+                    "Invalid Request");
+        } else {
+            if(!request.getString("json-rpc").equals("2.0")) {
+                /**
+                 * code = -32600
+                 * msg = Invalid Request
+                 */
+                throw new JSONRPCException(
+                        -32600,
+                        "Invalid Request");
+            }
+        }
+
+        if(!request.has("params")) {
+            /**
+             * code = -32600
+             * msg = Invalid Request
+             */
+            throw new JSONRPCException(
+                    -32600,
+                    "Invalid Request");
+        }
+
+        /**
+         * We only support named params at the moment.
+         */
+        params = request.getJSONObject("params");
+        if(params == null) {
+            /**
+             * code = -32600
+             * msg = Invalid Request
+             */
+            throw new JSONRPCException(
+                    -32600,
+                    "Invalid Request");
+        }
+
+        if(!request.has("method")) {
+            /**
+             * code = -32600
+             * msg = Invalid Request
+             */
+            throw new JSONRPCException(
+                    -32600,
+                    "Invalid Request");
+        }
+
+    }
+
+
+    /**
+     * Send a 'stop' message to the control socket.
+     *
+     * NOTE:
+     * Maybe, doing this in the interrupt call is not a good idea.
+     */
+    public void interrupt() {
+        byte[] msg = new byte[1];
+        Socket s = this.context.socket(ZMQ.PUSH);
+        s.connect("inproc://jsonrpc-"+this.nr);
+        s.send(msg, ZMQ.NOBLOCK);
+        s.close(); 
+        logger.debug("Sent a STOP Message to inproc://jsonrpc-"+this.nr);
+        //super.interrupt();
+    }
+
+    /**
+     * Start the JSONRPCServer thread.
+     *
+     * Binds the sockets before calling Thread.start(), this way
+     * they are already bound before the first run() is executed.
+     */
+    public void start() {
+        /** Bind Socket */
+        logger.debug("Binding Sockets ["+this.nr+"]");
+        this.socket.bind(this.bindUri);
+        this.controlSocket.bind("inproc://jsonrpc-"+this.nr);
+
+        logger.debug("Starting JSONRPCServer ["+this.nr+"]");
+        super.start();
     }
 }
