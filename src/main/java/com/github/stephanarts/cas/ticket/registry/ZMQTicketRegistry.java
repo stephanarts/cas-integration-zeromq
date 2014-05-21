@@ -41,9 +41,11 @@ import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMsg;
 
 
+import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
 
 /**
-* Key-value ticket registry implementation that stores tickets in memcached keyed on the ticket ID.
+* Ticket registry implementation that stores tickets via JSON-RPC
+* over a ZeroMQ transport layer.
 *
 * @author Stephan Arts
 */
