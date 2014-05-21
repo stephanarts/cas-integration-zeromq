@@ -62,6 +62,8 @@ public final class DeleteMethod implements IMethod {
 
         String ticketId = params.getString("ticket-id");
 
+        logger.debug("Delete key {}", ticketId);
+
         if(!this.map.containsKey(ticketId.hashCode())) {
             logger.warn("Missing Key {}", ticketId);
         }

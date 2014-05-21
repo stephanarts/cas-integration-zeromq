@@ -64,10 +64,11 @@ public final class UpdateMethod implements IMethod {
      */
     public JSONObject execute(final JSONObject params) throws JSONRPCException {
         JSONObject result = new JSONObject();
-        logger.debug("Update Ticket");
 
         String ticketId = params.getString("ticket-id");
         String serializedTicket = params.getString("ticket");
+
+        logger.debug("Update Ticket {}", ticketId);
 
         try {
             ByteArrayInputStream bi = new ByteArrayInputStream(
