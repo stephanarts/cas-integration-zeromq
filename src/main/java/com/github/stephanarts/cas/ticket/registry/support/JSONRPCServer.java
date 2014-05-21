@@ -70,6 +70,8 @@ public class JSONRPCServer extends Thread {
 
     private static int NR = 0;
 
+    private static Object NRLOCK = new Object();
+
     private final int nr;
 
 
@@ -90,10 +92,10 @@ public class JSONRPCServer extends Thread {
         this.setName("JSONRPCServer");
 
         this.methodMap = new HashMap<String, IMethod>();
-
-        this.NR++;
-
-        this.nr = this.NR;
+        synchronized(this.NRLOCK) {
+            this.NR++;
+            this.nr = this.NR;
+        }
     }
 
     /**
