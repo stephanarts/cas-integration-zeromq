@@ -48,13 +48,13 @@ import static org.mockito.Mockito.withSettings;
 public class JSONRPCServerTest
 {
 
-    private JSONRPCServer server;
-
+    /*
     private Context context;
 
     private Socket socket;
 
     private int port = 5000;
+    */
 
     private class TestMethod implements IMethod {
         public JSONObject execute(JSONObject params) {
@@ -64,8 +64,9 @@ public class JSONRPCServerTest
         }
     }
 
+    /*
     @Before
-    public void setUp() {
+    public synchronized void setUp() {
         this.context = ZMQ.context(1);
         this.server = new JSONRPCServer("tcp://localhost:"+this.port);
         this.server.start();
@@ -74,22 +75,32 @@ public class JSONRPCServerTest
 
         this.port++;
     }
+    */
 
+    /*
     @After
     public void tearDown() {
         this.socket.close();
         this.context.close();
         this.server.interrupt();
     }
+    */
 
     @Test
     public void testRegisterMethod() throws Exception {
+        JSONRPCServer server = new JSONRPCServer("tcp://localhost:7890");
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        server.start();
+        socket.connect("tcp://localhost:7890");
+
         boolean testcase_1 = false;
         boolean testcase_2 = false;
         boolean testcase_3 = false;
 
         try {
-            this.server.registerMethod("test", new TestMethod());
+            server.registerMethod("test", new TestMethod());
             testcase_1 = true;
         } catch (JSONRPCException e) {
             testcase_1 = false;
@@ -98,7 +109,7 @@ public class JSONRPCServerTest
         Assert.assertTrue(testcase_1);
 
         try {
-            this.server.registerMethod("test", new TestMethod());
+            server.registerMethod("test", new TestMethod());
             testcase_2 = true;
         } catch (JSONRPCException e) {
             testcase_2 = false;
@@ -107,26 +118,37 @@ public class JSONRPCServerTest
         Assert.assertFalse(testcase_2);
 
         try {
-            this.server.registerMethod("test-a", new TestMethod());
+            server.registerMethod("test-a", new TestMethod());
             testcase_3 = true;
         } catch (JSONRPCException e) {
             testcase_3 = false;
         }
 
         Assert.assertTrue(testcase_3);
+
+        socket.close();
+        context.close();
+        server.interrupt();
     }
 
     @Test
     public void testCallMethod() throws Exception {
+        JSONRPCServer server = new JSONRPCServer("tcp://localhost:7891");
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        server.start();
+        socket.connect("tcp://localhost:7891");
+
         try {
-            this.server.registerMethod("test-a", new TestMethod());
+            server.registerMethod("test-a", new TestMethod());
         } catch (JSONRPCException e) {
             throw new Exception(e);
         }
 
-        this.socket.send("{\"json-rpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-a\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+        socket.send("{\"json-rpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-a\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
 
-        PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
         int rc = ZMQ.poll(items, 5000);
         if(rc == -1) {
             throw new Exception("ZMQ.poll failed");
@@ -143,19 +165,30 @@ public class JSONRPCServerTest
         } else {
             throw new Exception("Failed to get reply from server");
         }
+
+        socket.close();
+        context.close();
+        server.interrupt();
     }
 
     @Test
     public void testMissingMethod() throws Exception {
+        JSONRPCServer server = new JSONRPCServer("tcp://localhost:7892");
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        server.start();
+        socket.connect("tcp://localhost:7892");
+
         try {
-            this.server.registerMethod("test-a", new TestMethod());
+            server.registerMethod("test-a", new TestMethod());
         } catch (JSONRPCException e) {
             throw new Exception(e);
         }
 
-        this.socket.send("{\"json-rpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}",ZMQ.DONTWAIT);
+        socket.send("{\"json-rpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}",ZMQ.DONTWAIT);
 
-        PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
         int rc = ZMQ.poll(items, 5000);
         if(rc == -1) {
             throw new Exception("ZMQ.poll failed");
@@ -174,19 +207,30 @@ public class JSONRPCServerTest
         } else {
             throw new Exception("Failed to get reply from server");
         }
+
+        socket.close();
+        context.close();
+        server.interrupt();
     }
 
     @Test
     public void testInvalidRequest() throws Exception {
+        JSONRPCServer server = new JSONRPCServer("tcp://localhost:7893");
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        server.start();
+        socket.connect("tcp://localhost:7893");
+
         try {
-            this.server.registerMethod("test-a", new TestMethod());
+            server.registerMethod("test-a", new TestMethod());
         } catch (JSONRPCException e) {
             throw new Exception(e);
         }
 
-        this.socket.send("{\"json-rpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+        socket.send("{\"json-rpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
 
-        PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
         int rc = ZMQ.poll(items, 5000);
         if(rc == -1) {
             throw new Exception("ZMQ.poll failed");
@@ -200,5 +244,9 @@ public class JSONRPCServerTest
         } else {
             throw new Exception("Failed to get reply from server");
         }
+
+        socket.close();
+        context.close();
+        server.interrupt();
     }
 }
