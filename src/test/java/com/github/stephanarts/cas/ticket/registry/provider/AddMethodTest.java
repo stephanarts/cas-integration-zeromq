@@ -105,10 +105,6 @@ public class AddMethodTest
         final IMethod method = new AddMethod(map);
 
         final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
-        /*
-        final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
-        when(ticket.getId()).thenReturn(ticketId);
-        */
 
         params.put("ticket-id", ticketId);
         params.put("ticket", "FAIL"); 
