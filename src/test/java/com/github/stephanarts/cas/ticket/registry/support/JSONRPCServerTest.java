@@ -64,28 +64,6 @@ public class JSONRPCServerTest
         }
     }
 
-    /*
-    @Before
-    public synchronized void setUp() {
-        this.context = ZMQ.context(1);
-        this.server = new JSONRPCServer("tcp://localhost:"+this.port);
-        this.server.start();
-        this.socket = this.context.socket(ZMQ.REQ);
-        this.socket.connect("tcp://localhost:"+this.port);
-
-        this.port++;
-    }
-    */
-
-    /*
-    @After
-    public void tearDown() {
-        this.socket.close();
-        this.context.close();
-        this.server.interrupt();
-    }
-    */
-
     @Test
     public void testRegisterMethod() throws Exception {
         JSONRPCServer server = new JSONRPCServer("tcp://localhost:7890");
