@@ -129,22 +129,9 @@ public class JSONRPCServer extends Thread {
         ZFrame body;
         String msg;
 
-        JSONObject request;
-
-        String methodName;
-        String methodId = null;
-
-        JSONObject params;
-
-        IMethod    method;
-
-        JSONObject response = new JSONObject();
-        JSONObject result;
-        JSONObject error = null;
+        String resp = null;
 
         Poller items = new Poller(2);
-
-        response.put("jsonrpc", "2.0");
 
         /** Enter the main event-loop */
         items.register(this.socket, Poller.POLLIN);
@@ -186,87 +173,21 @@ public class JSONRPCServer extends Thread {
                 message = ZMsg.recvMsg(socket);
                 body = message.getLast();
                 msg = new String(body.getData());
-
-                response.remove("id");
-                response.remove("error");
-                response.remove("result");
-
+            
                 logger.debug("Got a message");
 
                 try {
-                    request = new JSONObject(msg);
+                    resp = handleJSONRPC(msg);
 
-                    validateJSONRPC(request);
-
-                    /**
-                     * Get the methodId, required for sending a response.
-                     */
-                    methodId = request.getString("id");
-
-                    methodName = request.getString("method");
-                    if (!this.methodMap.containsKey(methodName)) {
-                        /**
-                         * code = -32601
-                         * msg = Method not Found
-                         */
-                        throw new JSONRPCException(
-                                -32601,
-                                "Method not Found");
-                    }
-
-                    method = this.methodMap.get(methodName);
-                    if (method == null) {
-                        /**
-                         * code = -32601
-                         * msg = Method not Found
-                         */
-                        throw new JSONRPCException(
-                                -32601,
-                                "Method not Found");
-                    }
-
-                    params = request.getJSONObject("params");
-
-                    result = method.execute(params);
-
-                    if(methodId != null) {
-                        response.put("id", methodId);
-                        response.put("result", result);
-                    }
-                } catch (final JSONException e) {
-                    response.put("id", methodId);
-
-                    error = new JSONObject();
-                    response.put("error", error);
-                    error.put("code", -32700);
-                    error.put("message", "Parse error");
-                    logger.warn("Parse error");
-                } catch (final JSONRPCException e) {
-                    response.put("id", methodId);
-
-                    error = new JSONObject();
-                    response.put("error", error);
-                    error.put("code", e.getCode());
-                    error.put("message", e.getMessage());
-                    logger.warn(e.getMessage());
-                } catch (final Exception e) {
-                    response.put("id", methodId);
-
-                    error = new JSONObject();
-                    response.put("error", error);
-                    error.put("code", -32603);
-                    error.put("message", "Internal error");
-                    logger.warn("Internal error");
-                }
-
-                if (methodId != null || error != null) {
                     logger.debug("Sent a reply");
                     message.removeLast();
-                    message.addString(response.toString());
+                    message.addString(resp);
                     message.send(this.socket);
+                } catch(final Exception e) {
+                    logger.warn(e.toString());
                 }
-
             }
+
         }
 
         logger.debug("Closing context ["+this.nr+"]");
@@ -274,6 +195,103 @@ public class JSONRPCServer extends Thread {
         this.socket.close();
         this.context.close();
     }
+
+    /**
+     * Handle JSONRPC call.
+     *
+     * @param msg     String message of the request.
+     *
+     * @return        String message of the response.
+     */
+    protected final String handleJSONRPC(final String msg) {
+        JSONObject response = new JSONObject();
+        JSONObject result;
+        JSONObject error = null;
+
+        JSONObject request;
+
+        String     methodName;
+        String     methodId = null;
+
+        IMethod    method;
+
+        JSONObject params;
+
+        response.put("jsonrpc", "2.0");
+
+        try {
+            request = new JSONObject(msg);
+
+            validateJSONRPC(request);
+
+            /**
+             * Get the methodId, required for sending a response.
+             */
+            methodId = request.getString("id");
+
+            methodName = request.getString("method");
+            if (!this.methodMap.containsKey(methodName)) {
+                /**
+                 * code = -32601
+                 * msg = Method not Found
+                 */
+                throw new JSONRPCException(
+                        -32601,
+                        "Method not Found");
+            }
+
+            method = this.methodMap.get(methodName);
+            if (method == null) {
+                /**
+                 * code = -32601
+                 * msg = Method not Found
+                 */
+                throw new JSONRPCException(
+                        -32601,
+                        "Method not Found");
+            }
+
+            params = request.getJSONObject("params");
+
+            result = method.execute(params);
+
+            if(methodId != null) {
+                response.put("id", methodId);
+                response.put("result", result);
+            }
+        } catch (final JSONException e) {
+            response.put("id", methodId);
+
+            error = new JSONObject();
+            response.put("error", error);
+            error.put("code", -32700);
+            error.put("message", "Parse error");
+            logger.warn("Parse error");
+        } catch (final JSONRPCException e) {
+            response.put("id", methodId);
+
+            error = new JSONObject();
+            response.put("error", error);
+            error.put("code", e.getCode());
+            error.put("message", e.getMessage());
+            logger.warn(e.getMessage());
+        } catch (final Exception e) {
+            response.put("id", methodId);
+
+            error = new JSONObject();
+            response.put("error", error);
+            error.put("code", -32603);
+            error.put("message", "Internal error");
+            logger.warn("Internal error");
+        }
+
+        if (methodId == null && error == null) {
+            return null;
+        }
+
+        return response.toString();
+    }
+    
 
     /**
      * Validate JSONRPC call.
@@ -286,7 +304,8 @@ public class JSONRPCServer extends Thread {
      * Batch calls or array-style parameters are not supported.
      *
      */
-    protected final void validateJSONRPC(final JSONObject request) throws JSONRPCException {
+    protected final void validateJSONRPC(final JSONObject request)
+            throws JSONRPCException {
 
         JSONObject params;
 
