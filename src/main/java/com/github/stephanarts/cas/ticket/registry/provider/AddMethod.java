@@ -23,6 +23,7 @@ import java.io.ObjectInputStream;
 import javax.xml.bind.DatatypeConverter;
 
 import org.json.JSONObject;
+//import org.json.JSONException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,13 +63,21 @@ public final class AddMethod implements IMethod {
      *
      * @throws JSONRPCException implementors can throw JSONRPCExceptions containing the error.
      */
-    public JSONObject execute(final JSONObject params) throws JSONRPCException {
+    public JSONObject execute(final JSONObject params)
+            throws JSONRPCException {
+
         JSONObject result = new JSONObject();
 
+        String ticketId = null;
+        String serializedTicket = null;
+
         logger.debug("Add Ticket");
+        if (!(params.has("ticket-id") && params.has("ticket"))) {
+            throw new JSONRPCException(-32602, "Invalid Params");
+        }
         try {
-            String ticketId = params.getString("ticket-id");
-            String serializedTicket = params.getString("ticket");
+            ticketId = params.getString("ticket-id");
+            serializedTicket = params.getString("ticket");
 
             ByteArrayInputStream bi = new ByteArrayInputStream(
             DatatypeConverter.parseBase64Binary(serializedTicket));
@@ -77,18 +86,14 @@ public final class AddMethod implements IMethod {
             Ticket ticket =(Ticket) si.readObject();
             if(this.map.containsKey(ticket.hashCode())) {
                 logger.error("Duplicate Key {}", ticketId);
-                /**
-                 * TODO
-                 *
-                 * Raise JSONRPCException.
-                 */
+                throw new JSONRPCException(-32502, "Duplicate Ticket");
             } else {
                 this.map.put(ticketId.hashCode(), ticket);
             }
 
             logger.debug("Ticket-ID '{}'", ticketId);
         } catch(final Exception e) {
-            logger.debug(e.getMessage());
+            throw new JSONRPCException(-32501, "Could not decode Ticket");
         }
 
         return result;
