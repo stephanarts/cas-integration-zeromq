@@ -57,15 +57,27 @@ public final class DeleteMethod implements IMethod {
      *
      * @throws JSONRPCException implementors can throw JSONRPCExceptions containing the error.
      */
-    public JSONObject execute(final JSONObject params) throws JSONRPCException {
+    public JSONObject execute(final JSONObject params)
+            throws JSONRPCException {
+
         JSONObject result = new JSONObject();
 
-        String ticketId = params.getString("ticket-id");
+        String ticketId = null;
+
+        if (params.length() != 1) {
+            throw new JSONRPCException(-32602, "Invalid Params");
+        }
+        if (!(params.has("ticket-id"))) {
+            throw new JSONRPCException(-32602, "Invalid Params");
+        }
+
+        ticketId = params.getString("ticket-id");
 
         logger.debug("Delete key {}", ticketId);
 
         if(!this.map.containsKey(ticketId.hashCode())) {
             logger.warn("Missing Key {}", ticketId);
+            throw new JSONRPCException(-32503, "Missing Key");
         }
 
         this.map.remove(ticketId.hashCode());
