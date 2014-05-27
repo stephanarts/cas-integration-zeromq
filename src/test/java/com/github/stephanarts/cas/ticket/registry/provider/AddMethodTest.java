@@ -78,10 +78,34 @@ public class AddMethodTest
     }
 
     @Test
+    public void testMissingParameters() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new AddMethod(map);
+
+
+        try {
+            method.execute(params);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32602, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Invalid Params"));
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
+    }
+
+    @Test
     public void testInvalidParameters() throws Exception {
         final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
         final JSONObject params = new JSONObject();
         final IMethod method = new AddMethod(map);
+
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+
+        params.put("ticket-id", ticketId);
+        params.put("ticket", "FAIL"); 
+        params.put("invalid-param", "MUST_FAIL"); 
 
         try {
             method.execute(params);

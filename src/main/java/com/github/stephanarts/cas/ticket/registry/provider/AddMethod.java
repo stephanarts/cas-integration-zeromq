@@ -74,6 +74,9 @@ public final class AddMethod implements IMethod {
         Ticket ticket = null;
 
         logger.debug("Add Ticket");
+        if (params.length() != 2) {
+            throw new JSONRPCException(-32602, "Invalid Params");
+        }
         if (!(params.has("ticket-id") && params.has("ticket"))) {
             throw new JSONRPCException(-32602, "Invalid Params");
         }
