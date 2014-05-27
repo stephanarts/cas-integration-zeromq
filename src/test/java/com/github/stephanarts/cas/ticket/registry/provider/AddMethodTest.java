@@ -96,6 +96,37 @@ public class AddMethodTest
 
     @Test
     public void testDuplicateTicket() throws Exception {
+        final byte[] serializedTicket;
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new AddMethod(map);
+
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket.getId()).thenReturn(ticketId);
+
+        map.put(ticketId.hashCode(), ticket);
+
+        try {
+            ByteArrayOutputStream bo = new ByteArrayOutputStream();
+            ObjectOutputStream so = new ObjectOutputStream(bo);
+            so.writeObject(ticket);
+            so.flush();
+            serializedTicket = bo.toByteArray();
+
+            params.put("ticket-id", ticketId);
+            params.put("ticket", DatatypeConverter.printBase64Binary(serializedTicket));
+            method.execute(params);
+
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32502, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Duplicate Ticket"));
+            return;
+        } catch (final Exception e) {
+            throw new Exception(e);
+        }
+
+        Assert.fail("No Exception Thrown");
     }
 
     @Test

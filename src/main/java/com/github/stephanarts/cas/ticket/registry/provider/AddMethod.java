@@ -71,6 +71,8 @@ public final class AddMethod implements IMethod {
         String ticketId = null;
         String serializedTicket = null;
 
+        Ticket ticket = null;
+
         logger.debug("Add Ticket");
         if (!(params.has("ticket-id") && params.has("ticket"))) {
             throw new JSONRPCException(-32602, "Invalid Params");
@@ -83,18 +85,19 @@ public final class AddMethod implements IMethod {
             DatatypeConverter.parseBase64Binary(serializedTicket));
             ObjectInputStream si = new ObjectInputStream(bi);
 
-            Ticket ticket =(Ticket) si.readObject();
-            if(this.map.containsKey(ticket.hashCode())) {
-                logger.error("Duplicate Key {}", ticketId);
-                throw new JSONRPCException(-32502, "Duplicate Ticket");
-            } else {
-                this.map.put(ticketId.hashCode(), ticket);
-            }
-
-            logger.debug("Ticket-ID '{}'", ticketId);
+            ticket =(Ticket) si.readObject();
         } catch(final Exception e) {
             throw new JSONRPCException(-32501, "Could not decode Ticket");
         }
+
+        if(this.map.containsKey(ticketId.hashCode())) {
+            logger.error("Duplicate Key {}", ticketId);
+            throw new JSONRPCException(-32502, "Duplicate Ticket");
+        } else {
+            this.map.put(ticketId.hashCode(), ticket);
+        }
+
+        logger.debug("Ticket-ID '{}'", ticketId);
 
         return result;
     }
