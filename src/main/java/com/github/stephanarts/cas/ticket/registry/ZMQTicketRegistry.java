@@ -90,6 +90,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
                 final String bindUri,
                 final int ticketGrantingTicketTimeOut,
                 final int serviceTicketTimeOut) {
+
         this.tgtTimeout = ticketGrantingTicketTimeOut;
         this.stTimeout = serviceTicketTimeOut;
 
