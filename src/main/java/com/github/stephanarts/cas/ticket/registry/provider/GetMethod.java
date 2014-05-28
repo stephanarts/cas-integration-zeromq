@@ -64,22 +64,33 @@ final class GetMethod implements IMethod {
      */
     public JSONObject execute(final JSONObject params) throws JSONRPCException {
         JSONObject result = new JSONObject();
+        Ticket ticket;
 
         logger.debug("GET");
 
-        String ticketId = params.getString("ticket-id");
-       
-        Ticket t = this.map.get(ticketId.hashCode());
+        String ticketId = null;
+
+        if (params.length() != 1) {
+            throw new JSONRPCException(-32602, "Invalid Params");
+        }
+        if (!(params.has("ticket-id"))) {
+            throw new JSONRPCException(-32602, "Invalid Params");
+        }
+
+        ticketId = params.getString("ticket-id");
+
+        ticket = this.map.get(ticketId.hashCode());
         byte[] serializedTicketArray = {0};
 
         try {
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
             ObjectOutputStream so = new ObjectOutputStream(bo);
-            so.writeObject(t);
+            so.writeObject(ticket);
             so.flush();
             serializedTicketArray = bo.toByteArray();
         } catch(final Exception e) {
             logger.debug(e.getMessage());
+            throw new JSONRPCException(-32500, "Error extracting Ticket");
         }
 
         result.put("ticket-id", ticketId);
