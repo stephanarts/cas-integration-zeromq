@@ -124,7 +124,7 @@ public class JSONRPCServerTest
             throw new Exception(e);
         }
 
-        socket.send("{\"json-rpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-a\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+        socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-a\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
 
         PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
         int rc = ZMQ.poll(items, 5000);
@@ -164,7 +164,7 @@ public class JSONRPCServerTest
             throw new Exception(e);
         }
 
-        socket.send("{\"json-rpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}",ZMQ.DONTWAIT);
+        socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}",ZMQ.DONTWAIT);
 
         PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
         int rc = ZMQ.poll(items, 5000);
@@ -206,7 +206,7 @@ public class JSONRPCServerTest
             throw new Exception(e);
         }
 
-        socket.send("{\"json-rpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+        socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
 
         PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
         int rc = ZMQ.poll(items, 5000);

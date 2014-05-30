@@ -80,6 +80,11 @@ final class GetMethod implements IMethod {
         ticketId = params.getString("ticket-id");
 
         ticket = this.map.get(ticketId.hashCode());
+
+        if(ticket == null) {
+            throw new JSONRPCException(-32503, "Missing Ticket");
+        }
+
         byte[] serializedTicketArray = {0};
 
         try {

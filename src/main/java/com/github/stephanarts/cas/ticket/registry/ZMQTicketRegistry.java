@@ -16,32 +16,14 @@ package com.github.stephanarts.cas.ticket.registry;
 
 import java.util.Collection;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
-
-import javax.xml.bind.DatatypeConverter;
-
 import javax.validation.constraints.Min;
 
 import org.jasig.cas.ticket.Ticket;
-//import org.jasig.cas.ticket.ServiceTicket;
-//import org.jasig.cas.ticket.TicketGrantingTicket;
 import org.jasig.cas.ticket.registry.AbstractDistributedTicketRegistry;
 import org.springframework.beans.factory.DisposableBean;
 
-import org.json.JSONObject;
-
-import org.zeromq.ZMQ;
-import org.zeromq.ZMQ.PollItem;
-import org.zeromq.ZMQ.Poller;
-import org.zeromq.ZMQ.Context;
-import org.zeromq.ZMQ.Socket;
-import org.zeromq.ZMsg;
-
-
 import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
+import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 
 /**
 * Ticket registry implementation that stores tickets via JSON-RPC
@@ -64,14 +46,9 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
     private final int stTimeout;
 
 
-    /**
-     * ZMQ Context.
-     */
-    private final Context context;
-
     private final ZMQProvider provider;
 
-    private final String[] hostnames;
+    private final RegistryClient[] providers;
 
 
     private final int requestTimeout = 1500; // msecs, (> 1000!)
@@ -94,13 +71,15 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
         this.tgtTimeout = ticketGrantingTicketTimeOut;
         this.stTimeout = serviceTicketTimeOut;
 
-        this.context = ZMQ.context(1);
-
         this.provider = new ZMQProvider(bindUri);
 
         this.provider.start();
 
-        this.hostnames = providers;
+        this.providers = new RegistryClient[providers.length];
+
+        for(int i = 0; i < this.providers.length; ++i) {
+            this.providers[i] = new RegistryClient(providers[i]);
+        }
     }
 
     /**
@@ -111,36 +90,10 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
     protected void updateTicket(final Ticket ticket) {
         logger.debug("Updating ticket {}", ticket);
 
-        String hostname;
-        byte[] serializedTicket;
-        JSONObject obj = new JSONObject();
-        JSONObject params = new JSONObject();
-
-        Socket socket;
-
-        for(int i = 0; i < this.hostnames.length; ++i) {
-
-            hostname = this.hostnames[i];
-            logger.debug("Updating to {}", hostname);
+        for(int i = 0; i < this.providers.length; ++i) {
             try {
-                ByteArrayOutputStream bo = new ByteArrayOutputStream();
-                ObjectOutputStream so = new ObjectOutputStream(bo);
-                so.writeObject(ticket);
-                so.flush();
-                serializedTicket = bo.toByteArray();
-
-                obj.put("json-rpc", "2.0");
-                obj.put("method", "update");
-                obj.put("params", params);
-
-                params.put("ticket-id", ticket.getId());
-                params.put("ticket", DatatypeConverter.printBase64Binary(serializedTicket));
-
-                socket = this.context.socket(ZMQ.REQ);
-                socket.connect(hostname);
-                socket.send(obj.toString(), 0);
-                socket.close();
-            } catch (final Exception e) {
+                this.providers[i].updateTicket(ticket);
+            } catch (final JSONRPCException e) {
                 logger.error(e.getMessage());
             }
         }
@@ -154,59 +107,10 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
     public void addTicket(final Ticket ticket) {
         logger.debug("Adding ticket {}", ticket);
 
-        String hostname;
-        byte[] serializedTicket;
-        JSONObject request = new JSONObject();
-        JSONObject requestParams = new JSONObject();
-        JSONObject response;
-        JSONObject result;
-
-        Socket socket;
-
-        request.put("json-rpc", "2.0");
-        request.put("id", "41");
-        request.put("method", "add");
-        request.put("params", requestParams);
-
-        try {
-            ByteArrayOutputStream bo = new ByteArrayOutputStream();
-            ObjectOutputStream so = new ObjectOutputStream(bo);
-            so.writeObject(ticket);
-            so.flush();
-            serializedTicket = bo.toByteArray();
-        } catch (final Exception e) {
-            return;
-        }
-
-        requestParams.put("ticket-id", ticket.getId());
-        requestParams.put("ticket", DatatypeConverter.printBase64Binary(serializedTicket));
-
-        for(int i = 0; i < this.hostnames.length; ++i) {
-            hostname = this.hostnames[i];
-            logger.debug("Adding to {}", hostname);
+        for(int i = 0; i < this.providers.length; ++i) {
             try {
-                socket = this.context.socket(ZMQ.REQ);
-                socket.connect(hostname);
-                socket.send(request.toString(), 0);
-
-                PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
-                int rc = ZMQ.poll(items, this.requestTimeout);
-                if(rc == -1) {
-                    break;
-                }
-
-                if(items[0].isReadable()) {
-                    // We got a reply from the server, must match sequence
-                    ZMsg message = ZMsg.recvMsg(socket);
-                    response = new JSONObject(new String(message.getLast().getData()));
-                    result = response.getJSONObject("result");
-                    socket.close();
-                    return;
-                } else {
-                    logger.debug("Failed to get reply from {}", hostname);
-                    socket.close();
-                }
-            } catch (final Exception e) {
+                this.providers[i].addTicket(ticket);
+            } catch (final JSONRPCException e) {
                 logger.error(e.getMessage());
             }
         }
@@ -222,49 +126,14 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
     public boolean deleteTicket(final String ticketId) {
         logger.debug("Deleting ticket {}", ticketId);
 
-        String hostname;
-
-        JSONObject request = new JSONObject();
-        JSONObject requestParams = new JSONObject();
-        JSONObject response;
-        JSONObject result;
-
-        Socket socket;
-
-        request.put("json-rpc", "2.0");
-        request.put("id", "41");
-        request.put("method", "delete");
-        request.put("params", requestParams);
-        requestParams.put("ticket-id", ticketId);
-
-        for(int i = 0; i < this.hostnames.length; ++i) {
-
-            hostname = this.hostnames[i];
-            logger.debug("Deleting from {}", hostname);
+        for(int i = 0; i < this.providers.length; ++i) {
             try {
-                socket = this.context.socket(ZMQ.REQ);
-                socket.connect(hostname);
-                socket.send(request.toString(), 0);
-
-                PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
-                int rc = ZMQ.poll(items, this.requestTimeout);
-                if(rc == -1) {
-                    break;
-                }
-
-                if(items[0].isReadable()) {
-                    // We got a reply from the server, must match sequence
-                    ZMsg message = ZMsg.recvMsg(socket);
-                    response = new JSONObject(new String(message.getLast().getData()));
-                    result = response.getJSONObject("result");
-                } else {
-                    logger.debug("Failed to get reply from {}", hostname);
-                    socket.close();
-                }
-            } catch (final Exception e) {
-                logger.debug(e.getMessage());
+                this.providers[i].deleteTicket(ticketId);
+            } catch (final JSONRPCException e) {
+                logger.error(e.getMessage());
             }
         }
+
         return false;
     }
 
@@ -278,63 +147,17 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
     public Ticket getTicket(final String ticketId) {
         logger.debug("Get Ticket {}", ticketId);
 
-        String hostname;
-        JSONObject request = new JSONObject();
-        JSONObject requestParams = new JSONObject();
-        JSONObject response;
-        JSONObject result;
+        Ticket ticket = null;
 
-        Socket socket;
-
-        request.put("json-rpc", "2.0");
-        request.put("id", "41");
-        request.put("method", "get");
-        request.put("params", requestParams);
-        requestParams.put("ticket-id", ticketId);
-
-        for(int i = 0; i < this.hostnames.length; ++i) {
-
-            hostname = this.hostnames[i];
-            logger.debug("Getting from {}", hostname);
+        for(int i = 0; i < this.providers.length; ++i) {
             try {
-                socket = this.context.socket(ZMQ.REQ);
-                socket.connect(hostname);
-                socket.send(request.toString(), 0);
-
-                PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
-                int rc = ZMQ.poll(items, this.requestTimeout);
-                if(rc == -1) {
-                    break;
-                }
-
-                if(items[0].isReadable()) {
-                    // We got a reply from the server, must match sequence
-                    ZMsg message = ZMsg.recvMsg(socket);
-                    response = new JSONObject(new String(message.getLast().getData()));
-                    result = response.getJSONObject("result");
-
-                    String serializedTicket = result.getString("ticket");
-                    ByteArrayInputStream bi = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(serializedTicket));
-                    ObjectInputStream si = new ObjectInputStream(bi);
-
-                    Ticket ticket = (Ticket) si.readObject();
-                    socket.close();
-                    if(ticket != null) {
-                      logger.debug("Get Ticket: {}", ticketId);
-                    } else {
-                      logger.debug("Failed to get Ticket: {}", ticketId);
-                    }
-                    if(ticket != null) {
-                        return ticket;
-                    }
-                } else {
-                    logger.debug("Failed to get reply from {}", hostname);
-                    socket.close();
-                }
-            } catch (final Exception e) {
-                logger.debug(e.getMessage());
+                ticket = this.providers[i].getTicket(ticketId);
+                return ticket;
+            } catch (final JSONRPCException e) {
+                logger.error(e.getMessage());
             }
         }
+
         return null;
     }
 

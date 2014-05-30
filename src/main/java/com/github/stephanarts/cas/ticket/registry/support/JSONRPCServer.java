@@ -227,7 +227,7 @@ public class JSONRPCServer extends Thread {
             /**
              * Get the methodId, required for sending a response.
              */
-            methodId = request.getString("id");
+            methodId = request.optString("id");
 
             methodName = request.getString("method");
             if (!this.methodMap.containsKey(methodName)) {
@@ -267,6 +267,7 @@ public class JSONRPCServer extends Thread {
             error.put("code", -32700);
             error.put("message", "Parse error");
             logger.warn("Parse error");
+            logger.warn(e.getMessage());
         } catch (final JSONRPCException e) {
             response.put("id", methodId);
 
@@ -311,7 +312,7 @@ public class JSONRPCServer extends Thread {
 
         JSONObject method;
 
-        if(!request.has("json-rpc")) {
+        if(!request.has("jsonrpc")) {
             /**
              * code = -32600
              * msg = Invalid Request
@@ -320,7 +321,7 @@ public class JSONRPCServer extends Thread {
                     -32600,
                     "Invalid Request");
         } else {
-            if(!request.getString("json-rpc").equals("2.0")) {
+            if(!request.getString("jsonrpc").equals("2.0")) {
                 /**
                  * code = -32600
                  * msg = Invalid Request
