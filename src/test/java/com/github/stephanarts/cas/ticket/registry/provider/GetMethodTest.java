@@ -67,14 +67,92 @@ public class GetMethodTest
     }
 
     @Test
-    public void testInvalidParameters() throws Exception {
+    public void testInvalidParameters1() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new GetMethod(map);
+
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+
+        params.put("ticket-id", ticketId);
+        params.put("invalid-param", "MUST_FAIL"); 
+
+        try {
+            method.execute(params);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32602, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Invalid Params"));
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
     }
 
     @Test
-    public void testSerializationError() throws Exception {
+    public void testInvalidParameters2() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new GetMethod(map);
+
+        params.put("invalid-param", "MUST_FAIL"); 
+
+        try {
+            method.execute(params);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32602, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Invalid Params"));
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
     }
 
     @Test
     public void testMissingTicket() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new GetMethod(map);
+
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+
+        params.put("ticket-id", ticketId);
+
+        try {
+            method.execute(params);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32503, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Missing Ticket"));
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
     }
+
+    @Ignore
+    @Test
+    public void testSerializationError() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new GetMethod(map);
+        final JSONObject result;
+
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+
+        map.put(ticketId.hashCode(), null);
+
+        params.put("ticket-id", ticketId);
+
+        try {
+            result = method.execute(params);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32500, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Error extracting Ticket"));
+            return;
+        } catch (final Exception e) {
+            throw new Exception(e);
+        }
+
+        Assert.fail("No Exception Thrown");
+    }
+
 }
