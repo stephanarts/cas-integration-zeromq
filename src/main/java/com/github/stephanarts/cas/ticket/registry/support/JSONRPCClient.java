@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.json.JSONObject;
-//import org.json.JSONException;
+import org.json.JSONException;
 
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Context;
@@ -111,20 +111,25 @@ public class JSONRPCClient {
         PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
         int rc = ZMQ.poll(items, this.requestTimeout);
         if(rc == -1) {
-            return null;
+            throw new JSONRPCException(1, "AAA");
+            //return null;
         }
 
         if(items[0].isReadable()) {
             // We got a reply from the server, must match sequence
             ZMsg message = ZMsg.recvMsg(socket);
-            response = new JSONObject(new String(message.getLast().getData()));
+            try {
+                response = new JSONObject(new String(message.getLast().getData()));
+            } catch(final JSONException e) {
+                throw new JSONRPCException(-32500, "Parse error");
+            }
             if (response.has("result")) {
                 result = response.getJSONObject("result");
                 socket.close();
                 return result;
             }
             if (response.has("error")) {
-                error = response.getJSONObject("error");
+              error = response.getJSONObject("error");
                 throw new JSONRPCException(error.getInt("code"), error.getString("message"));
             }
             throw new JSONRPCException(-32603, "Internal error");
@@ -133,7 +138,8 @@ public class JSONRPCClient {
             socket.close();
         }
 
-        return null;
+        throw new JSONRPCException(-10, "ABA");
+        //return null;
     }
 
 }
