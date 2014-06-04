@@ -65,17 +65,29 @@ public final class UpdateMethod implements IMethod {
     public JSONObject execute(final JSONObject params) throws JSONRPCException {
         JSONObject result = new JSONObject();
 
-        String ticketId = params.getString("ticket-id");
-        String serializedTicket = params.getString("ticket");
+        Ticket ticket;
+
+        String ticketId = null;
+        String serializedTicket = null;
 
         logger.debug("Update Ticket {}", ticketId);
 
+        if (params.length() != 2) {
+            throw new JSONRPCException(-32602, "Invalid Params");
+        }
+        if (!(params.has("ticket-id") && params.has("ticket"))) {
+            throw new JSONRPCException(-32602, "Invalid Params");
+        }
+
         try {
+            ticketId = params.getString("ticket-id");
+            serializedTicket = params.getString("ticket");
+
             ByteArrayInputStream bi = new ByteArrayInputStream(
                     DatatypeConverter.parseBase64Binary(serializedTicket));
             ObjectInputStream si = new ObjectInputStream(bi);
 
-            Ticket ticket =(Ticket) si.readObject();
+            ticket =(Ticket) si.readObject();
 
             if(!this.map.containsKey(ticket.hashCode())) {
                 logger.warn("Missing Key {}", ticketId);
@@ -83,7 +95,7 @@ public final class UpdateMethod implements IMethod {
 
             this.map.put(ticketId.hashCode(), ticket);
         } catch(final Exception e) {
-            logger.debug(e.getMessage());
+            throw new JSONRPCException(-32501, "Could not decode Ticket");
         }
 
         logger.debug("Ticket-ID '{}'", ticketId);

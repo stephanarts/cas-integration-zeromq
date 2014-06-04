@@ -15,6 +15,13 @@
 
 package com.github.stephanarts.cas.ticket.registry.provider;
 
+import java.util.HashMap;
+
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+
+import javax.xml.bind.DatatypeConverter;
+
 import org.junit.Test;
 import org.junit.Ignore;
 import org.junit.Assert;
@@ -23,13 +30,16 @@ import org.junit.runners.JUnit4;
 
 import org.json.JSONObject;
 
-import com.github.stephanarts.cas.ticket.registry.provider.UpdateMethod;
+import org.jasig.cas.ticket.Ticket;
+import org.jasig.cas.ticket.ServiceTicket;
 
-/*
+import com.github.stephanarts.cas.ticket.registry.provider.UpdateMethod;
+import com.github.stephanarts.cas.ticket.registry.support.IMethod;
+import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
-*/
 
 /**
  * Unit test for UpdateMethod.
@@ -37,7 +47,120 @@ import static org.mockito.Mockito.withSettings;
 @RunWith(JUnit4.class)
 public class UpdateMethodTest
 {
+
     @Test
     public void testValidInput() throws Exception {
+        final byte[] serializedTicket;
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new UpdateMethod(map);
+
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket.getId()).thenReturn(ticketId);
+
+        map.put(ticketId.hashCode(), ticket);
+
+        try {
+            ByteArrayOutputStream bo = new ByteArrayOutputStream();
+            ObjectOutputStream so = new ObjectOutputStream(bo);
+            so.writeObject(ticket);
+            so.flush();
+            serializedTicket = bo.toByteArray();
+
+            params.put("ticket-id", ticketId);
+            params.put("ticket", DatatypeConverter.printBase64Binary(serializedTicket));
+            method.execute(params);
+
+        } catch (final JSONRPCException e) {
+            Assert.fail(e.getMessage());
+        } catch (final Exception e) {
+            throw new Exception(e);
+        }
+    }
+
+    @Test
+    public void testMissingParameters() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new UpdateMethod(map);
+
+
+        try {
+            method.execute(params);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32602, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Invalid Params"));
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
+    }
+
+    @Test
+    public void testInvalidParameters1() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new UpdateMethod(map);
+
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+
+        params.put("ticket-id", ticketId);
+        params.put("ticket", "FAIL"); 
+        params.put("invalid-param", "MUST_FAIL"); 
+
+        try {
+            method.execute(params);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32602, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Invalid Params"));
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
+    }
+
+    @Test
+    public void testInvalidParameters2() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new UpdateMethod(map);
+
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+
+        params.put("ticket-id", ticketId);
+        params.put("invalid-param", "MUST_FAIL"); 
+
+        try {
+            method.execute(params);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32602, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Invalid Params"));
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
+    }
+
+    @Test
+    public void testDeserializationError() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new UpdateMethod(map);
+
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+
+        params.put("ticket-id", ticketId);
+        params.put("ticket", "FAIL"); 
+
+        try {
+            method.execute(params);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32501, e.getCode());
+            Assert.assertTrue(e.getMessage().equals("Could not decode Ticket"));
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
     }
 }
