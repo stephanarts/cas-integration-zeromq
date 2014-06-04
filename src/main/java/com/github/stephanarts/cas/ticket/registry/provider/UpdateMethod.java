@@ -89,6 +89,10 @@ public final class UpdateMethod implements IMethod {
 
             ticket =(Ticket) si.readObject();
 
+            if(ticket.isExpired()) {
+                logger.info("Ticket Expired {}", ticketId);
+            }
+
             if(!this.map.containsKey(ticket.hashCode())) {
                 logger.warn("Missing Key {}", ticketId);
             }
