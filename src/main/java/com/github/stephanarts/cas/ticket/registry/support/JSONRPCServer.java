@@ -144,17 +144,6 @@ public class JSONRPCServer extends Thread {
         while(!Thread.currentThread().isInterrupted()) {
             items.poll();
             logger.debug("["+this.nr+"] - got input");
-            for(int a = 0; a < items.getSize(); ++a) {
-                if(items.pollin(a)) {
-                    logger.debug("Input on :"+a);
-                }
-                if(items.pollout(a)) {
-                    logger.debug("output on :"+a);
-                }
-                if(items.pollerr(a)) {
-                    logger.debug("error on :"+a);
-                }
-            }
 
             /**
              * TODO
