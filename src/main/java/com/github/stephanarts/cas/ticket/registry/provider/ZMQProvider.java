@@ -49,10 +49,10 @@ public class ZMQProvider extends JSONRPCServer {
         this.ticketMap = new HashMap<Integer, Ticket>();
 
         try {
-            registerMethod("add", new AddMethod(this.ticketMap));
-            registerMethod("get", new GetMethod(this.ticketMap));
-            registerMethod("update", new UpdateMethod(this.ticketMap));
-            registerMethod("delete", new DeleteMethod(this.ticketMap));
+            registerMethod("cas.addTicket", new AddMethod(this.ticketMap));
+            registerMethod("cas.getTicket", new GetMethod(this.ticketMap));
+            registerMethod("cas.updateTicket", new UpdateMethod(this.ticketMap));
+            registerMethod("cas.deleteTicket", new DeleteMethod(this.ticketMap));
         } catch(final JSONRPCException e) {
             logger.error(e.getMessage());
         }

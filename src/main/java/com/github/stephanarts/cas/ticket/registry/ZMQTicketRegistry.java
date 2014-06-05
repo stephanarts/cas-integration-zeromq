@@ -174,13 +174,19 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
 
     /**
      * {@inheritDoc}
-     * This operation is not supported.
      *
-     * @throws UnsupportedOperationException if you try and call this operation.
      */
     @Override
     public Collection<Ticket> getTickets() {
-        throw new UnsupportedOperationException("GetTickets not supported.");
+        Collection<Ticket> tickets = null;
+
+        try {
+            tickets = this.providers[0].getTickets();
+        } catch (final JSONRPCException e) {
+            logger.error(e.getMessage());
+        }
+
+        return tickets;
     }
 
     /**

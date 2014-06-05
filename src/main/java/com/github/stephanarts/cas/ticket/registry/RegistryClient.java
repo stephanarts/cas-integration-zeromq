@@ -18,6 +18,9 @@ package com.github.stephanarts.cas.ticket.registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.ByteArrayInputStream;
@@ -26,6 +29,7 @@ import javax.xml.bind.DatatypeConverter;
 
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 //import org.json.JSONException;
 
 import org.jasig.cas.ticket.Ticket;
@@ -79,7 +83,7 @@ public class RegistryClient extends JSONRPCClient {
         params.put("ticket-id", ticket.getId());
         params.put("ticket", DatatypeConverter.printBase64Binary(serializedTicket));
         
-        this.call("add", params);
+        this.call("cas.addTicket", params);
     }
 
     /**
@@ -96,7 +100,7 @@ public class RegistryClient extends JSONRPCClient {
 
         params.put("ticket-id", ticketId);
 
-        this.call("delete", params);
+        this.call("cas.deleteTicket", params);
     }
 
 
@@ -120,7 +124,7 @@ public class RegistryClient extends JSONRPCClient {
 
         params.put("ticket-id", ticketId);
 
-        result = this.call("get", params);
+        result = this.call("cas.getTicket", params);
 
         if (result.has("ticket")) {
             serializedTicket = result.getString("ticket");
@@ -171,6 +175,48 @@ public class RegistryClient extends JSONRPCClient {
         params.put("ticket-id", ticket.getId());
         params.put("ticket", DatatypeConverter.printBase64Binary(serializedTicket));
         
-        return this.call("update", params);
+        return this.call("cas.updateTicket", params);
     }
+
+    /**
+     * Get a ticket from the ticketregistry.
+     *
+     * @return Ticket Objects
+     *
+     * @throws JSONRPCException Throws JSONRPCException containing any error.
+     */
+    public final Collection<Ticket> getTickets()
+            throws JSONRPCException {
+
+        JSONObject params = new JSONObject();
+        JSONObject result;
+        JSONArray  resultTickets;
+
+        Ticket ticket;
+        ArrayList<Ticket> tickets = new ArrayList<Ticket>();
+
+        result = this.call("cas.getTickets", params);
+
+        if (result.has("tickets")) {
+            resultTickets = result.getJSONArray("tickets");
+            for(int i = 0; i < result.length(); ++i) {
+                try {
+                    String serializedTicket = resultTickets.getString(i);
+                    ByteArrayInputStream bi = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(serializedTicket));
+                    ObjectInputStream si = new ObjectInputStream(bi);
+
+                    ticket = (Ticket) si.readObject();
+
+                    tickets.add(ticket);
+                } catch (final Exception e) {
+                    throw new JSONRPCException(-32501, "Could not decode Ticket");
+                }
+            }
+        }
+
+
+        return tickets;
+    }
+
+
 }
