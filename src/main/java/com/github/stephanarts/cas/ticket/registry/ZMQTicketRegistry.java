@@ -178,7 +178,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
      */
     @Override
     public Collection<Ticket> getTickets() {
-        Collection<Ticket> tickets = null;
+        Collection<Ticket> tickets = new ArrayList<Ticket>();
 
         try {
             tickets = this.providers[0].getTickets();
