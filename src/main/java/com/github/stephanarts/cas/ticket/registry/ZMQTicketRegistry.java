@@ -15,6 +15,7 @@
 package com.github.stephanarts.cas.ticket.registry;
 
 import java.util.Collection;
+import java.util.ArrayList;
 
 import javax.validation.constraints.Min;
 
