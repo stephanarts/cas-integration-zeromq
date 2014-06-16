@@ -28,7 +28,7 @@
 <groupId>com.github.stephanarts</groupId>
 <artifactId>cas-server-integration-zeromq</artifactId>
 <packaging>jar</packaging>
-<version>0.0.1-SNAPSHOT</version>
+<version>0.0.1</version>
 <name>ZeroMQ Integration for Jasig CAS</name>
 
 <repositories>
@@ -170,6 +170,13 @@
         <groupId>org.eluder.coveralls</groupId>
         <artifactId>coveralls-maven-plugin</artifactId>
         <version>2.2.0</version>
+      </plugin>
+      <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <configuration>
+            <keyname>Stephan Arts (Developer) &lt;stephan@xfce.org&gt;</keyname>
+            </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
