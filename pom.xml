@@ -77,9 +77,9 @@
   -->
 
     <scm>
-        <connection>scm:git:git@github.com:stephanarts/cas-integration-zeromq.git/tags/cas-server-integration-zeromq-0.0.1</connection>
-        <url>https://github.com/stephanarts/cas-integration-zeromq/tags/cas-server-integration-zeromq-0.0.1</url>
-        <tag>HEAD</tag>
+        <connection>scm:git:git@github.com:stephanarts/cas-integration-zeromq.git</connection>
+        <developerConnection>scm:git:git@github.com:stephanarts/cas-integration-zeromq.git</developerConnection>
+        <url>git@github.com:stephanarts/cas-integration-zeromq.git</url>
     </scm>
 
    <build>
