@@ -36,7 +36,8 @@ public class ZMQProvider extends JSONRPCServer {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     
-    private final HashMap<Integer, Ticket> ticketMap;
+    private final HashMap<Integer, Ticket> ticketMap =
+            new HashMap<Integer, Ticket>();
 
     /**
      *  Create a ZMQProvider.
@@ -45,8 +46,6 @@ public class ZMQProvider extends JSONRPCServer {
      */
     public ZMQProvider(final String bindUri) {
         super(bindUri);
-
-        this.ticketMap = new HashMap<Integer, Ticket>();
 
         try {
             registerMethod("cas.addTicket", new AddMethod(this.ticketMap));
