@@ -44,7 +44,7 @@ public class ZMQProvider extends JSONRPCServer {
      *
      *  @param bindUri    BindURI
      */
-    public ZMQProvider(final String bindUri) {
+    public ZMQProvider(final String bindUri, final String uniqueId) {
         super(bindUri);
 
         try {
@@ -53,6 +53,7 @@ public class ZMQProvider extends JSONRPCServer {
             registerMethod("cas.updateTicket", new UpdateMethod(this.ticketMap));
             registerMethod("cas.deleteTicket", new DeleteMethod(this.ticketMap));
             registerMethod("cas.getTickets", new GetTicketsMethod(this.ticketMap));
+            registerMethod("cas.getProviderId", new GetProviderIdMethod(uniqueId));
         } catch(final JSONRPCException e) {
             logger.error(e.getMessage());
         }

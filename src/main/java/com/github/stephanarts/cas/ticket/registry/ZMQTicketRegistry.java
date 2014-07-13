@@ -16,6 +16,7 @@ package com.github.stephanarts.cas.ticket.registry;
 
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import javax.validation.constraints.Min;
 
@@ -46,8 +47,9 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
     @Min(0)
     private final int stTimeout;
 
-
     private final ZMQProvider provider;
+
+    private final String providerId = UUID.randomUUID().toString();
 
     private final RegistryClient[] providers;
 
@@ -72,7 +74,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
         this.tgtTimeout = ticketGrantingTicketTimeOut;
         this.stTimeout = serviceTicketTimeOut;
 
-        this.provider = new ZMQProvider(bindUri);
+        this.provider = new ZMQProvider(bindUri, this.providerId);
 
         this.provider.start();
 
