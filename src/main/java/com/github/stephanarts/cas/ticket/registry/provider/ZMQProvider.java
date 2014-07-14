@@ -43,6 +43,7 @@ public class ZMQProvider extends JSONRPCServer {
      *  Create a ZMQProvider.
      *
      *  @param bindUri    BindURI
+     *  @param uniqueId   UniqueId used for identification.
      */
     public ZMQProvider(final String bindUri, final String uniqueId) {
         super(bindUri);

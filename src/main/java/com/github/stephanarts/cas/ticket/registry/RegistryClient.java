@@ -58,6 +58,30 @@ public class RegistryClient extends JSONRPCClient {
     }
 
     /**
+     * get ProviderId.
+     *
+     * @return providerId string
+     *
+     * @throws JSONRPCException when something goes wrong.
+     */
+    public final String getProviderId()
+            throws JSONRPCException {
+
+        JSONObject params = new JSONObject();
+        JSONObject result;
+
+        String providerId = null;
+
+        result = this.call("cas.getProviderId", params);
+
+        if (result.has("provider-id")) {
+            providerId = result.getString("provider-id");
+        }
+
+        return providerId;
+    }
+
+    /**
      * addTicket Method.
      *
      * @param ticket CAS Ticket object

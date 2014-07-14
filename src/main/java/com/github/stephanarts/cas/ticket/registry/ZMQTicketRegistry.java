@@ -51,7 +51,9 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
 
     private final String providerId = UUID.randomUUID().toString();
 
-    private final RegistryClient[] providers;
+    private RegistryClient[] providers;
+
+    private RegistryClient   localProvider;
 
 
     private final int requestTimeout = 1500; // msecs, (> 1000!)
@@ -64,12 +66,18 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
      * @param bindUri                           URI to bind the RegistryProvider on
      * @param ticketGrantingTicketTimeOut       Timeout
      * @param serviceTicketTimeOut              Timeout
+     *
+     * @throws Exception if localProvider could not be found
      */
     public ZMQTicketRegistry(
                 final String[] providers,
                 final String bindUri,
                 final int ticketGrantingTicketTimeOut,
-                final int serviceTicketTimeOut) {
+                final int serviceTicketTimeOut)
+            throws Exception {
+
+        RegistryClient client;
+        String id;
 
         this.tgtTimeout = ticketGrantingTicketTimeOut;
         this.stTimeout = serviceTicketTimeOut;
@@ -81,7 +89,21 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
         this.providers = new RegistryClient[providers.length];
 
         for(int i = 0; i < this.providers.length; ++i) {
-            this.providers[i] = new RegistryClient(providers[i]);
+            client = new RegistryClient(providers[i]);
+            try {
+                id = client.getProviderId();
+                if (this.providerId.equals(id)) {
+                    this.localProvider = client;
+                }
+            } catch (final JSONRPCException e) {
+                logger.error(e.getMessage());
+            }
+
+            this.providers[i] = client;
+        }
+
+        if (this.localProvider == null) {
+            throw new Exception("Local Provider not found");
         }
     }
 
@@ -152,6 +174,14 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
 
         Ticket ticket = null;
 
+        /* Try local provider first */
+        try {
+            ticket = this.localProvider.getTicket(ticketId);
+            return ticket;
+        } catch (final JSONRPCException e) {
+            logger.error(e.getMessage());
+        }
+
         for(int i = 0; i < this.providers.length; ++i) {
             try {
                 ticket = this.providers[i].getTicket(ticketId);
@@ -184,7 +214,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
         Collection<Ticket> tickets = new ArrayList<Ticket>();
 
         try {
-            tickets = this.providers[0].getTickets();
+            tickets = this.localProvider.getTickets();
         } catch (final JSONRPCException e) {
             logger.error(e.getMessage());
         }
