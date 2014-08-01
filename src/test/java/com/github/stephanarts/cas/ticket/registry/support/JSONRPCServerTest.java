@@ -64,6 +64,18 @@ public class JSONRPCServerTest
         }
     }
 
+    private class TestJSONRPCExceptionMethod implements IMethod {
+        public JSONObject execute(JSONObject params) throws JSONRPCException {
+            throw new JSONRPCException(-35400, "Application error");
+        }
+    }
+
+    private class TestExceptionMethod implements IMethod {
+        public JSONObject execute(JSONObject params) throws Exception {
+            throw new Exception("Unexpected Error");
+        }
+    }
+
     @Test
     public void testRegisterMethod() throws Exception {
         JSONRPCServer server = new JSONRPCServer("tcp://localhost:7890");
@@ -295,6 +307,90 @@ public class JSONRPCServerTest
             } else {
                 throw new Exception("Failed to get reply from server");
             }
+        }
+
+        socket.close();
+        context.close();
+        server.interrupt();
+    }
+
+    @Test
+    public void testCallMethodException() throws Exception {
+        JSONRPCServer server = new JSONRPCServer("tcp://localhost:7895");
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        server.start();
+        socket.connect("tcp://localhost:7895");
+
+        try {
+            server.registerMethod("test-a", new TestExceptionMethod());
+        } catch (JSONRPCException e) {
+            throw new Exception(e);
+        }
+
+        socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-a\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+
+        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+        int rc = ZMQ.poll(items, 5000);
+        if(rc == -1) {
+            throw new Exception("ZMQ.poll failed");
+        }
+
+        if(items[0].isReadable()) {
+            ZMsg message = ZMsg.recvMsg(socket);
+            JSONObject response = new JSONObject(new String(message.getLast().getData()));
+            JSONObject result = response.getJSONObject("error");
+
+            int code = result.getInt("code");
+            String msg = result.getString("message");
+
+            Assert.assertEquals(-32603,code);
+            Assert.assertTrue(msg.equals("Internal error"));
+        } else {
+            throw new Exception("Failed to get reply from server");
+        }
+
+        socket.close();
+        context.close();
+        server.interrupt();
+    }
+
+    @Test
+    public void testCallMethodJSONRPCException() throws Exception {
+        JSONRPCServer server = new JSONRPCServer("tcp://localhost:7896");
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        server.start();
+        socket.connect("tcp://localhost:7896");
+
+        try {
+            server.registerMethod("test-a", new TestJSONRPCExceptionMethod());
+        } catch (JSONRPCException e) {
+            throw new Exception(e);
+        }
+
+        socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-a\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+
+        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+        int rc = ZMQ.poll(items, 5000);
+        if(rc == -1) {
+            throw new Exception("ZMQ.poll failed");
+        }
+
+        if(items[0].isReadable()) {
+            ZMsg message = ZMsg.recvMsg(socket);
+            JSONObject response = new JSONObject(new String(message.getLast().getData()));
+            JSONObject result = response.getJSONObject("error");
+
+            int code = result.getInt("code");
+            String msg = result.getString("message");
+
+            Assert.assertEquals(-35400,code);
+            Assert.assertTrue(msg.equals("Application error"));
+        } else {
+            throw new Exception("Failed to get reply from server");
         }
 
         socket.close();

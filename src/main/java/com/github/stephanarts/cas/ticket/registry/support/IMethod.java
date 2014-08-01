@@ -31,6 +31,6 @@ public interface IMethod {
      *
      * @throws JSONRPCException implementors can throw JSONRPCExceptions containing the error.
      */
-    JSONObject execute(JSONObject params) throws JSONRPCException;
+    JSONObject execute(JSONObject params) throws JSONRPCException, Exception;
 
 }
