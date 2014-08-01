@@ -155,35 +155,43 @@ public class JSONRPCServerTest
         Context context = ZMQ.context(1);
         Socket socket = context.socket(ZMQ.REQ);
 
+        String requests[] = {
+            "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}",
+            "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-c\",\"params\":{\"a\":\"b\"}}"
+        };
+
         server.start();
         socket.connect("tcp://localhost:7892");
 
         try {
             server.registerMethod("test-a", new TestMethod());
+            server.registerMethod("test-b", null);
         } catch (JSONRPCException e) {
             throw new Exception(e);
         }
 
-        socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}",ZMQ.DONTWAIT);
+        for(int i = 0; i < requests.length ; ++i) {
+            socket.send(requests[i],ZMQ.DONTWAIT);
 
-        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
-        int rc = ZMQ.poll(items, 5000);
-        if(rc == -1) {
-            throw new Exception("ZMQ.poll failed");
-        }
+            PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, 5000);
+            if(rc == -1) {
+                throw new Exception("ZMQ.poll failed");
+            }
 
-        if(items[0].isReadable()) {
-            // We got a reply from the server, must match sequence
-            ZMsg message = ZMsg.recvMsg(socket);
-            JSONObject response = new JSONObject(new String(message.getLast().getData()));
-            JSONObject result = response.getJSONObject("error");
-            int code = result.getInt("code");
-            String msg = result.getString("message");
+            if(items[0].isReadable()) {
+                // We got a reply from the server, must match sequence
+                ZMsg message = ZMsg.recvMsg(socket);
+                JSONObject response = new JSONObject(new String(message.getLast().getData()));
+                JSONObject result = response.getJSONObject("error");
+                int code = result.getInt("code");
+                String msg = result.getString("message");
 
-            Assert.assertTrue(code==-32601);
-            Assert.assertTrue(msg.equals("Method not Found"));
-        } else {
-            throw new Exception("Failed to get reply from server");
+                Assert.assertTrue(code==-32601);
+                Assert.assertTrue(msg.equals("Method not Found"));
+            } else {
+                throw new Exception("Failed to get reply from server");
+            }
         }
 
         socket.close();
@@ -202,7 +210,8 @@ public class JSONRPCServerTest
             "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"params\":{\"a\":\"b\"}}",
             "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-a\"}",
             "{\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}",
-            "{\"id\":\"1\",\"method\":\"test-b\",\"params\":null}",
+            /* Only named params are supported */
+            "{\"id\":\"1\",\"method\":\"test-b\",\"params\":[]}",
         };
 
         server.start();
