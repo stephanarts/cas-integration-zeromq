@@ -15,15 +15,20 @@
 
 package com.github.stephanarts.cas.ticket.registry;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import junit.framework.Assert;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Ignore;
+import org.junit.Assert;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.jasig.cas.ticket.Ticket;
 import org.jasig.cas.ticket.ServiceTicket;
 
 import com.github.stephanarts.cas.ticket.registry.ZMQTicketRegistry;
+
+import java.util.Collection;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,27 +37,10 @@ import static org.mockito.Mockito.withSettings;
 /**
  * Unit test for ZMQTicketRegistry.
  */
+@RunWith(JUnit4.class)
 public class ZMQTicketRegistryTest
-    extends TestCase
 {
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public ZMQTicketRegistryTest( String testName )
-    {
-        super( testName );
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( ZMQTicketRegistryTest.class );
-    }
-
+    @Test
     public void testWriteGetDelete() throws Exception {
         final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
         final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
@@ -67,5 +55,25 @@ public class ZMQTicketRegistryTest
         Assert.assertEquals(ticketId, ticketFromRegistry.getId());
         registry.deleteTicket(ticketId);
         Assert.assertNull(registry.getTicket(ticketId));
+
+        registry = null;
     }
+
+    @Test
+    public void testGetTickets() throws Exception {
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket.getId()).thenReturn(ticketId);
+        String[] addresses = {"tcp://localhost:5556"};
+        ZMQTicketRegistry registry = new ZMQTicketRegistry(addresses,"tcp://localhost:5556", 30, 30);
+
+        registry.addTicket(ticket);
+
+        Collection<Ticket> tickets = registry.getTickets();
+        Assert.assertNotNull(tickets);
+        Assert.assertEquals(1, tickets.size());
+
+        registry = null;
+    }
+
 }
