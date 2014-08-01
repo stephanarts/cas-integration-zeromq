@@ -197,6 +197,14 @@ public class JSONRPCServerTest
         Context context = ZMQ.context(1);
         Socket socket = context.socket(ZMQ.REQ);
 
+        String requests[] = {
+            "{\"jsonrpc\":\"3.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}",
+            "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"params\":{\"a\":\"b\"}}",
+            "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-a\"}",
+            "{\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}",
+            "{\"id\":\"1\",\"method\":\"test-b\",\"params\":null}",
+        };
+
         server.start();
         socket.connect("tcp://localhost:7893");
 
@@ -206,84 +214,29 @@ public class JSONRPCServerTest
             throw new Exception(e);
         }
 
-        socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+        for(int i = 0; i < requests.length ; ++i) {
+            socket.send(requests[i], ZMQ.DONTWAIT);
 
-        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
-        int rc = ZMQ.poll(items, 5000);
-        if(rc == -1) {
-            throw new Exception("ZMQ.poll failed");
-        }
+            PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, 5000);
+            if(rc == -1) {
+                throw new Exception("ZMQ.poll failed");
+            }
 
-        if(items[0].isReadable()) {
-            // We got a reply from the server, must match sequence
-            ZMsg message = ZMsg.recvMsg(socket);
-            JSONObject response = new JSONObject(new String(message.getLast().getData()));
-            JSONObject result = response.getJSONObject("error");
-        } else {
-            throw new Exception("Failed to get reply from server");
-        }
+            if(items[0].isReadable()) {
+                // We got a reply from the server, must match sequence
+                ZMsg message = ZMsg.recvMsg(socket);
+                JSONObject response = new JSONObject(new String(message.getLast().getData()));
+                JSONObject result = response.getJSONObject("error");
 
-        socket.send("{\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
-        rc = ZMQ.poll(items, 5000);
-        if(rc == -1) {
-            throw new Exception("ZMQ.poll failed");
-        }
+                int code = result.getInt("code");
+                String msg = result.getString("message");
 
-        if(items[0].isReadable()) {
-            // We got a reply from the server, must match sequence
-            ZMsg message = ZMsg.recvMsg(socket);
-            JSONObject response = new JSONObject(new String(message.getLast().getData()));
-            JSONObject result = response.getJSONObject("error");
-        } else {
-            throw new Exception("Failed to get reply from server");
-        }
-
-        socket.send("{\"jsonrpc\":\"3.0\",\"id\":\"1\",\"method\":\"test-b\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
-
-        rc = ZMQ.poll(items, 5000);
-        if(rc == -1) {
-            throw new Exception("ZMQ.poll failed");
-        }
-
-        if(items[0].isReadable()) {
-            // We got a reply from the server, must match sequence
-            ZMsg message = ZMsg.recvMsg(socket);
-            JSONObject response = new JSONObject(new String(message.getLast().getData()));
-            JSONObject result = response.getJSONObject("error");
-        } else {
-            throw new Exception("Failed to get reply from server");
-        }
-
-        socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
-
-        rc = ZMQ.poll(items, 5000);
-        if(rc == -1) {
-            throw new Exception("ZMQ.poll failed");
-        }
-
-        if(items[0].isReadable()) {
-            // We got a reply from the server, must match sequence
-            ZMsg message = ZMsg.recvMsg(socket);
-            JSONObject response = new JSONObject(new String(message.getLast().getData()));
-            JSONObject result = response.getJSONObject("error");
-        } else {
-            throw new Exception("Failed to get reply from server");
-        }
-
-        socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-a\"}", ZMQ.DONTWAIT);
-
-        rc = ZMQ.poll(items, 5000);
-        if(rc == -1) {
-            throw new Exception("ZMQ.poll failed");
-        }
-
-        if(items[0].isReadable()) {
-            // We got a reply from the server, must match sequence
-            ZMsg message = ZMsg.recvMsg(socket);
-            JSONObject response = new JSONObject(new String(message.getLast().getData()));
-            JSONObject result = response.getJSONObject("error");
-        } else {
-            throw new Exception("Failed to get reply from server");
+                Assert.assertEquals(-32600,code);
+                Assert.assertTrue(msg.equals("Invalid Request"));
+            } else {
+                throw new Exception("Failed to get reply from server");
+            }
         }
 
         socket.close();
@@ -292,13 +245,17 @@ public class JSONRPCServerTest
     }
 
     @Test
-    public void testInvalidJSONRequest() throws Exception {
-        JSONRPCServer server = new JSONRPCServer("tcp://localhost:7893");
+    public void testParseError() throws Exception {
+        JSONRPCServer server = new JSONRPCServer("tcp://localhost:7894");
         Context context = ZMQ.context(1);
         Socket socket = context.socket(ZMQ.REQ);
 
+        String requests[] = {
+            "INVALID"
+        };
+
         server.start();
-        socket.connect("tcp://localhost:7893");
+        socket.connect("tcp://localhost:7894");
 
         try {
             server.registerMethod("test-a", new TestMethod());
@@ -306,21 +263,29 @@ public class JSONRPCServerTest
             throw new Exception(e);
         }
 
-        socket.send("()A", ZMQ.DONTWAIT);
+        for(int i = 0; i < requests.length ; ++i) {
+            socket.send(requests[i], ZMQ.DONTWAIT);
 
-        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
-        int rc = ZMQ.poll(items, 5000);
-        if(rc == -1) {
-            throw new Exception("ZMQ.poll failed");
-        }
+            PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, 5000);
+            if(rc == -1) {
+                throw new Exception("ZMQ.poll failed");
+            }
 
-        if(items[0].isReadable()) {
-            // We got a reply from the server, must match sequence
-            ZMsg message = ZMsg.recvMsg(socket);
-            JSONObject response = new JSONObject(new String(message.getLast().getData()));
-            JSONObject result = response.getJSONObject("error");
-        } else {
-            throw new Exception("Failed to get reply from server");
+            if(items[0].isReadable()) {
+                // We got a reply from the server, must match sequence
+                ZMsg message = ZMsg.recvMsg(socket);
+                JSONObject response = new JSONObject(new String(message.getLast().getData()));
+                JSONObject result = response.getJSONObject("error");
+
+                int code = result.getInt("code");
+                String msg = result.getString("message");
+
+                Assert.assertEquals(-32700,code);
+                Assert.assertTrue(msg.equals("Parse error"));
+            } else {
+                throw new Exception("Failed to get reply from server");
+            }
         }
 
         socket.close();
