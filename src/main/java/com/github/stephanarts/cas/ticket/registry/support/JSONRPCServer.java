@@ -153,9 +153,7 @@ public class JSONRPCServer extends Thread {
             if(items.pollin(1)) {
                 message = ZMsg.recvMsg(controlSocket);
                 logger.debug("Received STOP message [" + this.nr + "]");
-                this.socket.close();
-                this.context.close();
-                return;
+                break;
             }
             if(items.pollin(0)) {
                 message = ZMsg.recvMsg(socket);
