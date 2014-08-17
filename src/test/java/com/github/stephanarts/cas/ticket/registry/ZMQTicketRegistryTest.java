@@ -76,4 +76,14 @@ public class ZMQTicketRegistryTest
         registry = null;
     }
 
+
+    @Test
+    public void testNeedsCallback() throws Exception {
+
+        String[] addresses = {"tcp://localhost:5557"};
+        ZMQTicketRegistry registry = new ZMQTicketRegistry(addresses,"tcp://localhost:5557", 30, 30);
+
+        Assert.assertTrue(registry.needsCallback());
+        
+    }
 }
