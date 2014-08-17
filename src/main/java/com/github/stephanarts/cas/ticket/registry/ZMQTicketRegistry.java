@@ -15,8 +15,6 @@
 package com.github.stephanarts.cas.ticket.registry;
 
 import java.util.Collection;
-import java.util.ArrayList;
-import java.util.UUID;
 
 import javax.validation.constraints.Min;
 
@@ -24,16 +22,15 @@ import org.jasig.cas.ticket.Ticket;
 import org.jasig.cas.ticket.registry.AbstractDistributedTicketRegistry;
 import org.springframework.beans.factory.DisposableBean;
 
-import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
-import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
-
 /**
-* Ticket registry implementation that stores tickets via JSON-RPC
-* over a ZeroMQ transport layer.
-*
-* @author Stephan Arts
-*/
-public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry implements DisposableBean {
+ * Ticket registry implementation that stores tickets via JSON-RPC
+ * over a ZeroMQ transport layer.
+ *
+ * @author Stephan Arts
+ */
+public final class ZMQTicketRegistry
+        extends AbstractDistributedTicketRegistry
+        implements DisposableBean {
 
     /**
      * TGT cache entry timeout in seconds.
@@ -47,14 +44,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
     @Min(0)
     private final int stTimeout;
 
-    private final ZMQProvider provider;
-
-    private final String providerId = UUID.randomUUID().toString();
-
-    private RegistryClient[] providers;
-
-    private RegistryClient   localProvider;
-
+    private RegistryBroker   registryBroker;
 
     private final int requestTimeout = 1500; // msecs, (> 1000!)
 
@@ -76,35 +66,12 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
                 final int serviceTicketTimeOut)
             throws Exception {
 
-        RegistryClient client;
-        String id;
+        this.registryBroker = new RegistryBroker(
+                providers,
+                bindUri);
 
         this.tgtTimeout = ticketGrantingTicketTimeOut;
         this.stTimeout = serviceTicketTimeOut;
-
-        this.provider = new ZMQProvider(bindUri, this.providerId);
-
-        this.provider.start();
-
-        this.providers = new RegistryClient[providers.length];
-
-        for(int i = 0; i < this.providers.length; ++i) {
-            client = new RegistryClient(providers[i]);
-            try {
-                id = client.getProviderId();
-                if (this.providerId.equals(id)) {
-                    this.localProvider = client;
-                }
-            } catch (final JSONRPCException e) {
-                logger.error(e.getMessage());
-            }
-
-            this.providers[i] = client;
-        }
-
-        if (this.localProvider == null) {
-            throw new Exception("Local Provider not found");
-        }
     }
 
     /**
@@ -113,15 +80,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
      * @param ticket       Ticket-object to update in Registry
      */
     protected void updateTicket(final Ticket ticket) {
-        logger.debug("Updating ticket {}", ticket);
-
-        for(int i = 0; i < this.providers.length; ++i) {
-            try {
-                this.providers[i].updateTicket(ticket);
-            } catch (final JSONRPCException e) {
-                logger.error(e.getMessage());
-            }
-        }
+        this.registryBroker.updateTicket(ticket);
     }
 
     /**
@@ -130,15 +89,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
      * @param ticket       Ticket-object to add to Registry
      */
     public void addTicket(final Ticket ticket) {
-        logger.debug("Adding ticket {}", ticket);
-
-        for(int i = 0; i < this.providers.length; ++i) {
-            try {
-                this.providers[i].addTicket(ticket);
-            } catch (final JSONRPCException e) {
-                logger.error(e.getMessage());
-            }
-        }
+        this.registryBroker.addTicket(ticket);
     }
 
     /**
@@ -149,16 +100,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
      * @return     true/false ???
      */
     public boolean deleteTicket(final String ticketId) {
-        logger.debug("Deleting ticket {}", ticketId);
-
-        for(int i = 0; i < this.providers.length; ++i) {
-            try {
-                this.providers[i].deleteTicket(ticketId);
-            } catch (final JSONRPCException e) {
-                logger.error(e.getMessage());
-            }
-        }
-
+        this.registryBroker.deleteTicket(ticketId);
         return false;
     }
 
@@ -170,28 +112,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
      * @return               Ticket object
      */
     public Ticket getTicket(final String ticketId) {
-        logger.debug("Get Ticket {}", ticketId);
-
-        Ticket ticket = null;
-
-        /* Try local provider first */
-        try {
-            ticket = this.localProvider.getTicket(ticketId);
-            return ticket;
-        } catch (final JSONRPCException e) {
-            logger.error(e.getMessage());
-        }
-
-        for(int i = 0; i < this.providers.length; ++i) {
-            try {
-                ticket = this.providers[i].getTicket(ticketId);
-                return ticket;
-            } catch (final JSONRPCException e) {
-                logger.error(e.getMessage());
-            }
-        }
-
-        return null;
+        return registryBroker.getTicket(ticketId);
     }
 
     /**
@@ -200,7 +121,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
      */
     @Override
     public void destroy() throws Exception {
-        this.provider.stop();
+        this.registryBroker = null;
         return;
     }
 
@@ -211,15 +132,7 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
      */
     @Override
     public Collection<Ticket> getTickets() {
-        Collection<Ticket> tickets = new ArrayList<Ticket>();
-
-        try {
-            tickets = this.localProvider.getTickets();
-        } catch (final JSONRPCException e) {
-            logger.error(e.getMessage());
-        }
-
-        return tickets;
+        return this.registryBroker.getTickets();
     }
 
     /**
@@ -230,5 +143,4 @@ public final class ZMQTicketRegistry extends AbstractDistributedTicketRegistry i
     protected boolean needsCallback() {
         return true;
     }
-
 }
