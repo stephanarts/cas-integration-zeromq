@@ -188,7 +188,7 @@ public final class RegistryBroker {
      * @throws Exception when destruction fails.
      */
     public void destroy() throws Exception {
-        this.provider.stop();
+        this.close();
         return;
     }
 
@@ -210,5 +210,13 @@ public final class RegistryBroker {
         }
 
         return tickets;
+    }
+
+    /**
+     * Close the RegistryBroker.
+     *
+     */
+    public void close() {
+        this.provider.stop();
     }
 }
