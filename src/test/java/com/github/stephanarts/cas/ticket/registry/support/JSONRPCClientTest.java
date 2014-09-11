@@ -143,6 +143,15 @@ public class JSONRPCClientTest
 
         logger.debug("testValidResponse.call");
         c.call("t", params);
+
+
+        try {
+            Thread.sleep(30000);
+        } catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+
+        c.call("t", params);
     }
 
     @Test
@@ -179,5 +188,17 @@ public class JSONRPCClientTest
         }
 
         Assert.fail("No Exception Thrown");
+    }
+
+    @Test
+    public void testValidEndurance() throws Exception {
+        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2222");
+        JSONObject params = new JSONObject();
+
+        logger.debug("testValidEndurance.call");
+
+        for(int i = 0; i < 5000; ++i) {
+            c.call("t", params);
+        }
     }
 }
