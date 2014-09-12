@@ -144,7 +144,7 @@ public class JSONRPCClient {
             socket.close();
         }
 
-        throw new JSONRPCException(-10, "ABA");
+        throw new JSONRPCException(-10, "Connection not readable.");
         //return null;
     }
 
