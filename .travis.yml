@@ -1,8 +1,4 @@
 language: java
 
-before_script:
-  - ulimit -n 128
-  - ./show_test_environment.sh
-
 after_success:
   - mvn clean cobertura:cobertura coveralls:cobertura
