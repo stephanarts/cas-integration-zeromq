@@ -62,7 +62,6 @@ public class JSONRPCClientTest
         protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 
-
         Context context;
         Socket  validResponseSocket;
         Socket  invalidResponseSocket;
@@ -84,7 +83,7 @@ public class JSONRPCClientTest
             logger.debug("poll");
             while(!Thread.currentThread().isInterrupted()) {
                 items.poll();
-                logger.debug("poll-res");
+                logger.trace("poll-res");
 
                 if(items.pollin(0)) {
                     message = ZMsg.recvMsg(this.validResponseSocket);
@@ -141,6 +140,8 @@ public class JSONRPCClientTest
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2222");
         JSONObject params = new JSONObject();
 
+        c.connect();
+
         logger.debug("testValidResponse.call");
         c.call("t", params);
 
@@ -152,6 +153,8 @@ public class JSONRPCClientTest
         }
 
         c.call("t", params);
+
+        c.disconnect();
     }
 
     @Test
@@ -159,6 +162,8 @@ public class JSONRPCClientTest
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2223");
         JSONObject params = new JSONObject();
         JSONObject result = null;
+
+        c.connect();
 
         try {
             logger.debug("testInvalidResponse.call");
@@ -178,14 +183,19 @@ public class JSONRPCClientTest
         JSONObject params = new JSONObject();
         JSONObject result = null;
 
+        c.connect();
+
         try {
             result = c.call("t", params);
             Assert.assertNotNull(result);
             
         } catch (final JSONRPCException e) {
             Assert.assertEquals(e.getCode(), -32501);
+            c.disconnect();
             return;
         }
+
+        c.disconnect();
 
         Assert.fail("No Exception Thrown");
     }
@@ -195,10 +205,43 @@ public class JSONRPCClientTest
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2222");
         JSONObject params = new JSONObject();
 
+        c.connect();
+
         logger.debug("testValidEndurance.call");
 
         for(int i = 0; i < 5000; ++i) {
             c.call("t", params);
         }
+
+        c.disconnect();
+
+    }
+
+    @Test
+    public void testErrorEndurance() throws Exception {
+        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2224");
+        JSONObject params = new JSONObject();
+        JSONObject result = null;
+        int a = 0;
+
+        c.connect();
+
+        for(int i = 0; i < 5000; ++i) {
+            try {
+                result = c.call("t", params);
+                Assert.assertNotNull(result);
+            } catch (final JSONRPCException e) {
+                Assert.assertEquals(e.getCode(), -32501);
+                a++;
+            }
+        }
+
+        c.disconnect();
+
+        if (a == 5000) {
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
     }
 }

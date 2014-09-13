@@ -45,8 +45,8 @@ public class JSONRPCClient {
 
     /**
      * ZMQ Socket.
-    private final Socket  socket;
      */
+    private final Socket  socket;
 
     /**
      * ConnectUri.
@@ -72,10 +72,29 @@ public class JSONRPCClient {
 
         this.context = ZMQ.context(1);
 
-        //this.socket = this.context.socket(ZMQ.REQ);
         this.connectUri = connectUri;
 
-        this.requestTimeout = 1500;
+        this.requestTimeout = 500;
+
+        this.socket = this.context.socket(ZMQ.REQ);
+    }
+
+    /**
+     * Connect.
+     */
+    public final void connect() {
+
+        this.socket.connect(this.connectUri);
+
+    }
+
+    /**
+     * Disconnect.
+     */
+    public final void disconnect() {
+
+        this.socket.close();
+
     }
 
     /**
@@ -98,22 +117,20 @@ public class JSONRPCClient {
         JSONObject response;
         this.id++;
 
-        Socket socket = this.context.socket(ZMQ.REQ);
-
         request.put("jsonrpc", "2.0");
         request.put("id", this.id);
         request.put("method", method);
         request.put("params", params);
 
-        socket.connect(this.connectUri);
-        socket.send(request.toString(), 0);
+        logger.trace("Sending data...");
+        this.socket.send(request.toString(), 0);
 
-        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+        PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+
+        logger.trace("Waiting for response data...");
         int rc = ZMQ.poll(items, this.requestTimeout);
         if(rc == -1) {
-            socket.close();
-            throw new JSONRPCException(1, "AAA");
-            //return null;
+            throw new JSONRPCException(1, "Request Timeout");
         }
 
         if(items[0].isReadable()) {
@@ -123,29 +140,22 @@ public class JSONRPCClient {
             try {
                 response = new JSONObject(new String(message.getLast().getData()));
             } catch(final JSONException e) {
-                socket.close();
                 throw new JSONRPCException(-32500, "Parse error");
             }
             if (response.has("result")) {
                 result = response.getJSONObject("result");
-                socket.close();
                 return result;
             }
             if (response.has("error")) {
                 error = response.getJSONObject("error");
-                socket.close();
                 throw new JSONRPCException(error.getInt("code"), error.getString("message"));
             }
-
-            socket.close();
             throw new JSONRPCException(-32603, "Internal error");
         } else {
             logger.debug("Failed to get reply from {}", this.connectUri);
-            socket.close();
         }
 
         throw new JSONRPCException(-10, "Connection not readable.");
-        //return null;
     }
 
 }

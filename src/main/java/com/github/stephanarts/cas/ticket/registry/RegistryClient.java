@@ -55,6 +55,7 @@ public class RegistryClient extends JSONRPCClient {
      */
     public RegistryClient(final String connectUri) {
         super(connectUri);
+        this.connect();
     }
 
     /**
