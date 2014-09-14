@@ -28,7 +28,7 @@
 <groupId>com.github.stephanarts</groupId>
 <artifactId>cas-server-integration-zeromq</artifactId>
 <packaging>jar</packaging>
-<version>0.0.2</version>
+<version>0.0.3-SNAPSHOT</version>
 <name>ZeroMQ Integration for Jasig CAS</name>
 
 <repositories>
