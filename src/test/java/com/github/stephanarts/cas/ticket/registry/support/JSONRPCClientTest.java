@@ -66,6 +66,7 @@ public class JSONRPCClientTest
         Socket  validResponseSocket;
         Socket  invalidResponseSocket;
         Socket  errorResponseSocket;
+        Socket  noResponseSocket;
 
         public final void run() {
 
@@ -79,6 +80,7 @@ public class JSONRPCClientTest
             items.register(this.validResponseSocket, Poller.POLLIN);
             items.register(this.invalidResponseSocket, Poller.POLLIN);
             items.register(this.errorResponseSocket, Poller.POLLIN);
+            items.register(this.noResponseSocket, Poller.POLLIN);
 
             logger.debug("poll");
             while(!Thread.currentThread().isInterrupted()) {
@@ -103,6 +105,10 @@ public class JSONRPCClientTest
                     message.addString("{\"json-rpc\": \"2.0\", \"error\": {\"code\": -32501, \"message\": \"Test\"}}");
                     message.send(this.errorResponseSocket);
                 }
+                if(items.pollin(3)) {
+                    message = ZMsg.recvMsg(this.noResponseSocket);
+                    message.removeLast();
+                }
             }
 
         }
@@ -112,10 +118,12 @@ public class JSONRPCClientTest
             this.validResponseSocket = context.socket(ZMQ.ROUTER);
             this.invalidResponseSocket = context.socket(ZMQ.ROUTER);
             this.errorResponseSocket = context.socket(ZMQ.ROUTER);
+            this.noResponseSocket = context.socket(ZMQ.ROUTER);
 
             this.validResponseSocket.bind("tcp://localhost:2222");
             this.invalidResponseSocket.bind("tcp://localhost:2223");
             this.errorResponseSocket.bind("tcp://localhost:2224");
+            this.noResponseSocket.bind("tcp://localhost:2225");
 
             logger.debug("START");
             super.start();
@@ -169,7 +177,7 @@ public class JSONRPCClientTest
             result = c.call("t", params);
             Assert.assertNotNull(result);
         } catch (final JSONRPCException e) {
-            Assert.assertEquals(e.getCode(), -32500);
+            Assert.assertEquals(-32700, e.getCode());
             return;
         }
 
@@ -240,6 +248,29 @@ public class JSONRPCClientTest
         if (a == 5000) {
             return;
         }
+
+        Assert.fail("No Exception Thrown");
+    }
+
+    @Test
+    public void testTimeout() throws Exception {
+        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2225");
+        JSONObject params = new JSONObject();
+        JSONObject result = null;
+        int a = 0;
+
+        c.connect();
+
+        try {
+            result = c.call("t", params);
+            Assert.assertNotNull(result);
+        } catch (final JSONRPCException e) {
+            Assert.assertEquals(-32300, e.getCode());
+            c.disconnect();
+            return;
+        }
+
+        c.disconnect();
 
         Assert.fail("No Exception Thrown");
     }

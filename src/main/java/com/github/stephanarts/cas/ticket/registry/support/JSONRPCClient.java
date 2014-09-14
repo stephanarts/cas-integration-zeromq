@@ -140,7 +140,7 @@ public class JSONRPCClient {
             try {
                 response = new JSONObject(new String(message.getLast().getData()));
             } catch(final JSONException e) {
-                throw new JSONRPCException(-32500, "Parse error");
+                throw new JSONRPCException(-32700, "Parse error");
             }
             if (response.has("result")) {
                 result = response.getJSONObject("result");
@@ -155,7 +155,7 @@ public class JSONRPCClient {
             logger.debug("Failed to get reply from {}", this.connectUri);
         }
 
-        throw new JSONRPCException(-10, "Connection not readable.");
+        throw new JSONRPCException(-32300, "Request Timeout");
     }
 
 }
