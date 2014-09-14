@@ -130,7 +130,7 @@ public class JSONRPCClient {
         logger.trace("Waiting for response data...");
         int rc = ZMQ.poll(items, this.requestTimeout);
         if(rc == -1) {
-            throw new JSONRPCException(1, "Request Timeout");
+            throw new JSONRPCException(-32603, "Internal error");
         }
 
         if(items[0].isReadable()) {
