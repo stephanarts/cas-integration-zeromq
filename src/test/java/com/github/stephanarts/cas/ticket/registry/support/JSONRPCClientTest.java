@@ -145,7 +145,6 @@ public class JSONRPCClientTest
         logger.debug("testValidResponse.call");
         c.call("t", params);
 
-
         try {
             Thread.sleep(30000);
         } catch(InterruptedException ex) {

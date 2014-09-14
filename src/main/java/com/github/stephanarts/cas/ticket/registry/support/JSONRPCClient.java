@@ -74,7 +74,7 @@ public class JSONRPCClient {
 
         this.connectUri = connectUri;
 
-        this.requestTimeout = 500;
+        this.requestTimeout = 1500;
 
         this.socket = this.context.socket(ZMQ.REQ);
     }
