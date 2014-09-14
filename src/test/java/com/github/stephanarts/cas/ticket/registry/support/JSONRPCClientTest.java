@@ -143,6 +143,13 @@ public class JSONRPCClientTest
     }
 
 
+    /**
+     * testValidResponse
+     *
+     * Goal:
+     * Test handling of a valid response.
+     *
+     */
     @Test
     public void testValidResponse() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2222");
@@ -164,6 +171,13 @@ public class JSONRPCClientTest
         c.disconnect();
     }
 
+    /**
+     * testInvalidResponse
+     *
+     * Goal:
+     * Test handling of an invalid response.
+     *
+     */
     @Test
     public void testInvalidResponse() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2223");
@@ -184,6 +198,13 @@ public class JSONRPCClientTest
         Assert.fail("No Exception Thrown");
     } 
 
+    /**
+     * testErrorResponse
+     *
+     * Goal:
+     * Test handling of an individual error response.
+     *
+     */
     @Test
     public void testErrorResponse() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2224");
@@ -207,6 +228,14 @@ public class JSONRPCClientTest
         Assert.fail("No Exception Thrown");
     }
 
+    /**
+     * testValidEndurance
+     *
+     * Goal:
+     * Test that the client still responds properly after
+     * Handing 5000 valid Responses.
+     *
+     */
     @Test
     public void testValidEndurance() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2222");
@@ -224,6 +253,14 @@ public class JSONRPCClientTest
 
     }
 
+    /**
+     * testErrorEndurance
+     *
+     * Goal:
+     * Test that the client still responds properly after
+     * Handing 5000 application errors.
+     *
+     */
     @Test
     public void testErrorEndurance() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2224");
@@ -238,7 +275,7 @@ public class JSONRPCClientTest
                 result = c.call("t", params);
                 Assert.assertNotNull(result);
             } catch (final JSONRPCException e) {
-                Assert.assertEquals(e.getCode(), -32501);
+                Assert.assertEquals(-32501, e.getCode());
                 a++;
             }
         }
@@ -252,6 +289,52 @@ public class JSONRPCClientTest
         Assert.fail("No Exception Thrown");
     }
 
+    /**
+     * testInvalidEndurance
+     *
+     * Goal:
+     * Test that the client still responds properly after
+     * Handing 5000 invalid responses.
+     *
+     */
+    @Test
+    public void testInvalidEndurance() throws Exception {
+        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2223");
+        JSONObject params = new JSONObject();
+        JSONObject result = null;
+        int a = 0;
+
+        c.connect();
+
+        for(int i = 0; i < 5000; ++i) {
+            try {
+                result = c.call("t", params);
+                Assert.assertNotNull(result);
+            } catch (final JSONRPCException e) {
+                Assert.assertEquals(-32700, e.getCode());
+                a++;
+            }
+        }
+
+        c.disconnect();
+
+        if (a == 5000) {
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
+    }
+
+    /**
+     * testTimeout
+     *
+     * Goal:
+     * test that the proper exception is thrown when the server
+     * takes too long to respond.
+     *
+     * Method:
+     * no-response server object sends no reply.
+     */
     @Test
     public void testTimeout() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2225");
