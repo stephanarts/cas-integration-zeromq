@@ -46,7 +46,7 @@ public class JSONRPCClient {
     /**
      * ZMQ Socket.
      */
-    private final Socket  socket;
+    private Socket  socket;
 
     /**
      * ConnectUri.
@@ -92,9 +92,7 @@ public class JSONRPCClient {
      * Disconnect.
      */
     public final void disconnect() {
-
         this.socket.close();
-
     }
 
     /**
@@ -153,9 +151,22 @@ public class JSONRPCClient {
             throw new JSONRPCException(-32603, "Internal error");
         } else {
             logger.debug("Failed to get reply from {}", this.connectUri);
+
+            cleanup();
+            connect();
         }
 
         throw new JSONRPCException(-32300, "Request Timeout");
+    }
+
+
+    /**
+     * Cleanup.
+     */
+    private void cleanup() {
+        this.socket.setLinger(0);
+        this.socket.close();
+        this.socket = this.context.socket(ZMQ.REQ);
     }
 
 }
