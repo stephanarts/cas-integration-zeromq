@@ -59,4 +59,18 @@ public class BootstrapExceptionTest
 
         Assert.assertTrue(exception_thrown);
     }
+
+    @Test
+    public void testBootstrapExceptionCustomMessage() throws Exception {
+        boolean exception_thrown = false;
+
+        try {
+            throw new BootstrapException("It failed -- really");
+        } catch (BootstrapException e) {
+            exception_thrown = true;
+            Assert.assertTrue(e.getMessage().equals("It failed -- really"));
+        }
+
+        Assert.assertTrue(exception_thrown);
+    }
 }
