@@ -44,7 +44,9 @@ public class RegistryBrokerTest
 
         RegistryBroker broker = new RegistryBroker(
             addresses,
-            addresses[0]);
+            addresses[0],
+            1500,
+            200);
 
         broker.close();
     }
@@ -57,7 +59,7 @@ public class RegistryBrokerTest
 
         String[] addresses = {"tcp://localhost:4440","tcp://localhost:4441"};
 
-        ZMQProvider provider = new ZMQProvider(addresses[1], "primary");
+        ZMQProvider provider = new ZMQProvider(addresses[1], "primary", 200);
         RegistryClient populator = new RegistryClient(addresses[1]);
         RegistryClient checker = new RegistryClient(addresses[0]);
         RegistryBroker broker = null;
@@ -73,7 +75,9 @@ public class RegistryBrokerTest
          */
         broker = new RegistryBroker(
             addresses,
-            addresses[0]);
+            addresses[0],
+            1500,
+            200);
 
         try {
             broker.bootstrap();
@@ -109,7 +113,9 @@ public class RegistryBrokerTest
          */
         broker = new RegistryBroker(
             addresses,
-            addresses[0]);
+            addresses[0],
+            1500,
+            200);
 
         try {
             broker.bootstrap();

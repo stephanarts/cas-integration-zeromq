@@ -48,7 +48,7 @@ public final class RegistryBroker {
 
     private RegistryClient   localProvider;
 
-    private final int requestTimeout = 1500; // msecs, (> 1000!)
+    private final int requestTimeout;
 
     private boolean bootstrapped = false;
 
@@ -61,18 +61,24 @@ public final class RegistryBroker {
      *
      * @param providers  Array of providers to connect to
      * @param bindUri    URI to bind the RegistryProvider on
+     * @param requestTimeout timeout for client requests.
+     * @param heartbeatInterval heartbeat interval for local provider.
      *
      * @throws Exception if localProvider could not be found
      */
     public RegistryBroker(
                 final String[] providers,
-                final String bindUri)
+                final String bindUri,
+                final int requestTimeout,
+                final int heartbeatInterval)
             throws Exception {
 
         RegistryClient client;
         String id;
 
-        this.provider = new ZMQProvider(bindUri, this.providerId);
+        this.requestTimeout = requestTimeout;
+
+        this.provider = new ZMQProvider(bindUri, this.providerId, heartbeatInterval);
 
         this.provider.start();
 

@@ -16,8 +16,6 @@ package com.github.stephanarts.cas.ticket.registry;
 
 import java.util.Collection;
 
-import javax.validation.constraints.Min;
-
 import org.jasig.cas.ticket.Ticket;
 import org.jasig.cas.ticket.registry.AbstractDistributedTicketRegistry;
 import org.springframework.beans.factory.DisposableBean;
@@ -38,52 +36,36 @@ public final class ZMQTicketRegistry
     //protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 
-    /**
-     * TGT cache entry timeout in seconds.
-     */
-    @Min(0)
-    private final int tgtTimeout;
-
-    /**
-     * ST cache entry timeout in seconds.
-     */
-    @Min(0)
-    private final int stTimeout;
-
     private RegistryBroker   registryBroker;
-
-    private final int requestTimeout = 1500; // msecs, (> 1000!)
-
 
     /**
      * Creates a new instance that stores tickets in the given ZMQ Registry-Providers.
      *
      * @param providers                         Array of providers to connect to
      * @param bindUri                           URI to bind the RegistryProvider on
-     * @param ticketGrantingTicketTimeOut       Timeout
-     * @param serviceTicketTimeOut              Timeout
+     * @param requestTimeout                    Timeout
+     * @param heartbeatInterval                 Interval
      *
      * @throws Exception if localProvider could not be found
      */
     public ZMQTicketRegistry(
                 final String[] providers,
                 final String bindUri,
-                final int ticketGrantingTicketTimeOut,
-                final int serviceTicketTimeOut)
+                final int requestTimeout,
+                final int heartbeatInterval)
             throws Exception {
 
         this.registryBroker = new RegistryBroker(
                 providers,
-                bindUri);
+                bindUri,
+                requestTimeout,
+                heartbeatInterval);
 
         try {
             this.registryBroker.bootstrap();
         } catch (final BootstrapException e) {
             logger.warn(e.getMessage());
         }
-
-        this.tgtTimeout = ticketGrantingTicketTimeOut;
-        this.stTimeout = serviceTicketTimeOut;
     }
 
     /**

@@ -32,8 +32,8 @@ ZeroMQ/JSON-RPC Ticket-Registry-Backend For WAN Clustering
                     </list>
                 </constructor-arg>
                 <constructor-arg name="bindUri" value="tcp://*:5555" />
-                <constructor-arg name="ticketGrantingTicketTimeOut" value="7200" />
-                <constructor-arg name="serviceTicketTimeOut" value="3600" />
+                <constructor-arg name="requestTimeout" value="1500" />
+                <constructor-arg name="heartbeatInterval" value="200" />
             </bean>
         
             <!--Quartz -->
