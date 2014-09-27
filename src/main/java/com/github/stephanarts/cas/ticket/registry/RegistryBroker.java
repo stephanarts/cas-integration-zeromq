@@ -69,6 +69,8 @@ public final class RegistryBroker {
 
         RegistryClient client;
         String id;
+        Collection<Ticket> tickets = new ArrayList<Ticket>();
+
 
         this.provider = new ZMQProvider(bindUri, this.providerId);
 
@@ -92,6 +94,17 @@ public final class RegistryBroker {
 
         if (this.localProvider == null) {
             throw new Exception("Local Provider not found");
+        }
+
+        for (int i = 0; i < this.providers.length; ++i) {
+            /* Bootstrap the localProvider */
+            if (this.providers[i] != this.localProvider) {
+                tickets = this.providers[i].getTickets();
+                for(Ticket ticket: tickets) {
+                    this.localProvider.addTicket(ticket);
+                }
+                break;
+            }
         }
     }
 
