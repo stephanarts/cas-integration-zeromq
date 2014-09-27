@@ -33,6 +33,12 @@ public final class ZMQTicketRegistry
         implements DisposableBean {
 
     /**
+     * Logging Class.
+     */
+    //protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+
+    /**
      * TGT cache entry timeout in seconds.
      */
     @Min(0)
@@ -69,6 +75,12 @@ public final class ZMQTicketRegistry
         this.registryBroker = new RegistryBroker(
                 providers,
                 bindUri);
+
+        try {
+            this.registryBroker.bootstrap();
+        } catch (final BootstrapException e) {
+            logger.warn(e.getMessage());
+        }
 
         this.tgtTimeout = ticketGrantingTicketTimeOut;
         this.stTimeout = serviceTicketTimeOut;

@@ -25,6 +25,7 @@ import org.jasig.cas.ticket.Ticket;
 import org.jasig.cas.ticket.ServiceTicket;
 
 import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
+import com.github.stephanarts.cas.ticket.registry.BootstrapException;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -43,20 +44,22 @@ public class RegistryBrokerTest
 
         RegistryBroker broker = new RegistryBroker(
             addresses,
-            "tcp://localhost:4444");
+            addresses[0]);
+
+        broker.close();
     }
 
     @Test
-    public void testBootstrap() throws Exception {
+    public void testBootstrapSuccess() throws Exception {
         final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
         final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
         when(ticket.getId()).thenReturn(ticketId);
 
         String[] addresses = {"tcp://localhost:4440","tcp://localhost:4441"};
 
-        ZMQProvider provider = new ZMQProvider(addresses[0], "primary");
-        RegistryClient populator = new RegistryClient(addresses[0]);
-        RegistryClient checker = new RegistryClient(addresses[1]);
+        ZMQProvider provider = new ZMQProvider(addresses[1], "primary");
+        RegistryClient populator = new RegistryClient(addresses[1]);
+        RegistryClient checker = new RegistryClient(addresses[0]);
         RegistryBroker broker = null;
 
         provider.start();
@@ -70,13 +73,53 @@ public class RegistryBrokerTest
          */
         broker = new RegistryBroker(
             addresses,
-            addresses[1]);
+            addresses[0]);
+
+        try {
+            broker.bootstrap();
+        } catch (final BootstrapException e) {
+            provider.interrupt();
+            broker.close();
+            Assert.fail("Bootstrapping Failed"); 
+        }
 
         final ServiceTicket ticketFromRegistry = (ServiceTicket) checker.getTicket(ticketId);
 
-        provider.stop();
+        provider.interrupt();
+
+        broker.close();
 
         Assert.assertNotNull(ticketFromRegistry);
         Assert.assertEquals(ticketId, ticketFromRegistry.getId());
+    }
+
+    @Test
+    public void testBootstrapFailure() throws Exception {
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket.getId()).thenReturn(ticketId);
+
+        String[] addresses = {"tcp://localhost:4440","tcp://localhost:4441"};
+
+        RegistryBroker broker = null;
+
+        /*
+         * If bootstrapping is successfull,
+         * checker returns the ticket we've added
+         */
+        broker = new RegistryBroker(
+            addresses,
+            addresses[0]);
+
+        try {
+            broker.bootstrap();
+        } catch (final BootstrapException e) {
+            broker.close();
+            return;
+        }
+
+        broker.close();
+
+        Assert.fail ("BootstrapException not thrown");
     }
 }

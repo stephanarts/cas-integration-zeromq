@@ -38,7 +38,6 @@ public class ZMQProvider extends JSONRPCServer {
     
     private final HashMap<Integer, Ticket> ticketMap =
             new HashMap<Integer, Ticket>();
-
     /**
      *  Create a ZMQProvider.
      *

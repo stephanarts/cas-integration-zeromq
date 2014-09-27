@@ -50,6 +50,8 @@ public final class RegistryBroker {
 
     private final int requestTimeout = 1500; // msecs, (> 1000!)
 
+    private boolean bootstrapped = false;
+
 
     /**
      * Creates a new RegistryBroker.
@@ -69,8 +71,6 @@ public final class RegistryBroker {
 
         RegistryClient client;
         String id;
-        Collection<Ticket> tickets = new ArrayList<Ticket>();
-
 
         this.provider = new ZMQProvider(bindUri, this.providerId);
 
@@ -96,17 +96,47 @@ public final class RegistryBroker {
             throw new Exception("Local Provider not found");
         }
 
+    }
+
+    /**
+     * bootstrap
+     *
+     * Bootstrap Local Provider.
+     *
+     * @throws BootstrapException when bootstrapping fails.
+     */
+    public void bootstrap() throws BootstrapException {
+
+        Collection<Ticket> tickets = new ArrayList<Ticket>();
+
         for (int i = 0; i < this.providers.length; ++i) {
             /* Bootstrap the localProvider */
             if (this.providers[i] != this.localProvider) {
-                tickets = this.providers[i].getTickets();
-                for(Ticket ticket: tickets) {
-                    this.localProvider.addTicket(ticket);
+                try {
+                    tickets = this.providers[i].getTickets();
+                } catch (final JSONRPCException e) {
+                    continue;
                 }
-                break;
+
+                this.bootstrapped = true;
+
+                for(Ticket ticket: tickets) {
+                    try {
+                        this.localProvider.addTicket(ticket);
+                    } catch (final JSONRPCException e) {
+                        this.bootstrapped = false;
+                        throw new BootstrapException();
+                    }
+                }
+                /* Bootstrap success */
+                return;
             }
         }
+
+        /* Tried all providers, no success... */
+        throw new BootstrapException();
     }
+
 
     /**
      * Update a ticket in the ticketregistry.
@@ -230,6 +260,6 @@ public final class RegistryBroker {
      *
      */
     public void close() {
-        this.provider.stop();
+        this.provider.interrupt();
     }
 }

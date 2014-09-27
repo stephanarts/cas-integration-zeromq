@@ -177,6 +177,9 @@ public class JSONRPCServer extends Thread {
         }
 
         logger.debug("Closing context ["+this.nr+"]");
+        this.socket.setLinger(0);
+        this.controlSocket.setLinger(0);
+
         this.controlSocket.close();
         this.socket.close();
         this.context.close();

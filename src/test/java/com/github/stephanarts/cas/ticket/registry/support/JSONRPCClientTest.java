@@ -139,7 +139,7 @@ public class JSONRPCClientTest
 
     @AfterClass
     public static void afterTest() {
-        server.stop();
+        server.interrupt();
     }
 
 
