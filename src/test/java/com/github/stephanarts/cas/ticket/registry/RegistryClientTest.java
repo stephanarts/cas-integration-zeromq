@@ -84,4 +84,33 @@ public class RegistryClientTest
         provider.interrupt();
         Assert.fail("No exception thrown");
     }
+
+    @Test
+    public void testUpdateTicket() throws Exception {
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket.getId()).thenReturn(ticketId);
+
+        String[] addresses = {"tcp://localhost:4440"};
+        ZMQProvider provider = new ZMQProvider(addresses[0], "add", 200);
+        RegistryClient client = new RegistryClient(addresses[0]);
+
+        provider.start();
+
+        try {
+            client.addTicket(ticket);
+        } catch (final JSONRPCException e) {
+            provider.interrupt();
+            Assert.fail("Adding ticket Failed");
+        }
+
+        try {
+            client.updateTicket(ticket);
+        } catch (final JSONRPCException e) {
+            provider.interrupt();
+            Assert.fail("Update ticket Failed");
+        }
+
+        provider.interrupt();
+    }
 }
