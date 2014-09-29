@@ -357,4 +357,42 @@ public class JSONRPCClientTest
 
         Assert.fail("No Exception Thrown");
     }
+
+    /**
+     * testHeartbeat
+     */
+    public void testHeartbeat() throws Exception {
+        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2225");
+
+        c.connect();
+
+        try {
+            c.heartbeat();
+        } catch (final HeartbeatException e) {
+            c.disconnect();
+            Assert.fail(e.getMessage());
+            return;
+        }
+
+        c.disconnect();
+    }
+
+    /**
+     * testHeartbeatFailure
+     */
+    public void testHeartbeatFailure() throws Exception {
+        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2230");
+
+        c.connect();
+
+        try {
+            c.heartbeat();
+        } catch (final HeartbeatException e) {
+            c.disconnect();
+            return;
+        }
+
+        c.disconnect();
+        Assert.fail("No exception thrown");
+    }
 }

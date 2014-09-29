@@ -64,6 +64,11 @@ public class JSONRPCClient {
     private final int requestTimeout;
 
     /**
+     * HeartbeatTimeout.
+     */
+    private int heartbeatTimeout = 200;
+
+    /**
      * Create a JSONRPCClient object.
      *
      * @param connectUri   The URI to connect to
@@ -121,39 +126,46 @@ public class JSONRPCClient {
         request.put("params", params);
 
         logger.trace("Sending data...");
-        this.socket.send(request.toString(), 0);
 
-        PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+        /* Use a syncrhonized statement to prevent
+         * json-rpc calls and heartbeat messages to
+         * interfere.
+         */
+        synchronized(this) {
+            this.socket.send(request.toString(), 0);
 
-        logger.trace("Waiting for response data...");
-        int rc = ZMQ.poll(items, this.requestTimeout);
-        if(rc == -1) {
-            throw new JSONRPCException(-32603, "Internal error");
-        }
+            PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
 
-        if(items[0].isReadable()) {
-            // We got a reply from the server, must match sequence
-            ZMsg message = ZMsg.recvMsg(socket);
-
-            try {
-                response = new JSONObject(new String(message.getLast().getData()));
-            } catch(final JSONException e) {
-                throw new JSONRPCException(-32700, "Parse error");
+            logger.trace("Waiting for response data...");
+            int rc = ZMQ.poll(items, this.requestTimeout);
+            if(rc == -1) {
+                throw new JSONRPCException(-32603, "Internal error");
             }
-            if (response.has("result")) {
-                result = response.getJSONObject("result");
-                return result;
-            }
-            if (response.has("error")) {
-                error = response.getJSONObject("error");
-                throw new JSONRPCException(error.getInt("code"), error.getString("message"));
-            }
-            throw new JSONRPCException(-32603, "Internal error");
-        } else {
-            logger.debug("Failed to get reply from {}", this.connectUri);
 
-            cleanup();
-            connect();
+            if(items[0].isReadable()) {
+                // We got a reply from the server, must match sequence
+                ZMsg message = ZMsg.recvMsg(socket);
+
+                try {
+                    response = new JSONObject(new String(message.getLast().getData()));
+                } catch(final JSONException e) {
+                    throw new JSONRPCException(-32700, "Parse error");
+                }
+                if (response.has("result")) {
+                    result = response.getJSONObject("result");
+                    return result;
+                }
+                if (response.has("error")) {
+                    error = response.getJSONObject("error");
+                    throw new JSONRPCException(error.getInt("code"), error.getString("message"));
+                }
+                throw new JSONRPCException(-32603, "Internal error");
+            } else {
+                logger.debug("Failed to get reply from {}", this.connectUri);
+
+                cleanup();
+                connect();
+            }
         }
 
         throw new JSONRPCException(-32300, "Request Timeout");
@@ -167,6 +179,38 @@ public class JSONRPCClient {
         this.socket.setLinger(0);
         this.socket.close();
         this.socket = this.context.socket(ZMQ.REQ);
+    }
+
+    /**
+     * Send a heartbeat message.
+     *
+     * This is actually no json-rpc, but just a single '0x0' byte.
+     * It is done to keep the heartbeat overhead low.
+     *
+     * @throws HeartbeatException when a heartbeat fails
+     *
+     */
+    public final void heartbeat() throws HeartbeatException {
+        synchronized(this) {
+
+            this.socket.send(new byte[] {0x0}, 0);
+
+            PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, this.heartbeatTimeout);
+            if(rc == -1) {
+                throw new HeartbeatException("Poll failed");
+            }
+            if(items[0].isReadable()) {
+                ZMsg message = ZMsg.recvMsg(this.socket);
+
+                logger.warn("Heartbeat received");
+            } else {
+                logger.warn("Heartbeat missed");
+                cleanup();
+                connect();
+                throw new HeartbeatException("Heartbeat missed");
+            }
+        }
     }
 
 }
