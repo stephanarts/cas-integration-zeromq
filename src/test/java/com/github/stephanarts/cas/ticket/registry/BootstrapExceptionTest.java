@@ -46,6 +46,18 @@ import static org.mockito.Mockito.withSettings;
 @RunWith(JUnit4.class)
 public class BootstrapExceptionTest
 {
+
+    /**
+     * testBootstrapException().
+     *
+     * testBootstrapException throws a BootstrapException and catches it.
+     * It then validates the Exception-message.
+     *
+     * This test fails when either the Exception is not thrown,
+     * or the message does not correspond to the expected default.
+     *
+     * @throws Exception when a test-case fails, an exception is thrown.
+     */
     @Test
     public void testBootstrapException() throws Exception {
         boolean exception_thrown = false;
@@ -60,6 +72,18 @@ public class BootstrapExceptionTest
         Assert.assertTrue(exception_thrown);
     }
 
+    /**
+     * testBootstrapExceptionCustomMessage().
+     *
+     * testBootstrapExceptionCustomMessage throws a BootstrapException
+     * and catches it. It then validates the Exception-message.
+     *
+     * This test fails when either the Exception is not thrown,
+     * or the message does not correspond to the value provided
+     * through the constructor.
+     *
+     * @throws Exception when a test-case fails, an exception is thrown.
+     */
     @Test
     public void testBootstrapExceptionCustomMessage() throws Exception {
         boolean exception_thrown = false;

@@ -25,6 +25,7 @@ import org.jasig.cas.ticket.Ticket;
 import org.jasig.cas.ticket.ServiceTicket;
 
 import com.github.stephanarts.cas.ticket.registry.RegistryClient;
+import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,5 +41,47 @@ public class RegistryClientTest
     @Test
     public void testConstructor() throws Exception {
         RegistryClient client = new RegistryClient("tcp://localhost:4444");
+    }
+
+   
+    @Test
+    public void testAddTicket() throws Exception {
+        final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket.getId()).thenReturn(ticketId);
+
+        String[] addresses = {"tcp://localhost:4440"};
+        ZMQProvider provider = new ZMQProvider(addresses[0], "add", 200);
+        RegistryClient client = new RegistryClient(addresses[0]);
+
+        provider.start();
+
+        try {
+            client.addTicket(ticket);
+        } catch (final JSONRPCException e) {
+            provider.interrupt();
+            Assert.fail("Adding ticket Failed");
+        }
+
+        provider.interrupt();
+    }
+
+    @Test
+    public void testAddNullTicket() throws Exception {
+        String[] addresses = {"tcp://localhost:4440"};
+        ZMQProvider provider = new ZMQProvider(addresses[0], "add", 200);
+        RegistryClient client = new RegistryClient(addresses[0]);
+
+        provider.start();
+
+        try {
+            client.addTicket(null);
+        } catch (final JSONRPCException e) {
+            provider.interrupt();
+            return;
+        }
+
+        provider.interrupt();
+        Assert.fail("No exception thrown");
     }
 }
