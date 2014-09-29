@@ -95,6 +95,11 @@ public class RegistryClient extends JSONRPCClient {
         byte[] serializedTicket = {};
         JSONObject params = new JSONObject();
 
+        /* Check if it's not null */
+        if (ticket == null) {
+            throw new JSONRPCException(-32501, "Could not encode Ticket");
+        }
+
         try {
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
             ObjectOutputStream so = new ObjectOutputStream(bo);
@@ -102,7 +107,7 @@ public class RegistryClient extends JSONRPCClient {
             so.flush();
             serializedTicket = bo.toByteArray();
         } catch (final Exception e) {
-            throw new JSONRPCException(-32501, "Could not decode Ticket");
+            throw new JSONRPCException(-32501, "Could not encode Ticket");
         }
 
         params.put("ticket-id", ticket.getId());
