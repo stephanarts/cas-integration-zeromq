@@ -48,10 +48,10 @@ public class ZMQTicketRegistryTest
 
         String[] addresses = {"tcp://localhost:5555"};
         ZMQTicketRegistry registry = new ZMQTicketRegistry(
-		addresses,
-		addresses[0],
-		1500
-		2000);
+                addresses,
+                addresses[0],
+                1500,
+                2000);
 
         registry.addTicket(ticket);
 
@@ -72,10 +72,10 @@ public class ZMQTicketRegistryTest
 
         String[] addresses = {"tcp://localhost:5556"};
         ZMQTicketRegistry registry = new ZMQTicketRegistry(
-		addresses,
-		addresses[0],
-		1500
-		2000);
+                addresses,
+                addresses[0],
+                1500,
+                2000);
 
         registry.addTicket(ticket);
 
@@ -96,10 +96,10 @@ public class ZMQTicketRegistryTest
 
         String[] addresses = {"tcp://localhost:5557"};
         ZMQTicketRegistry registry = new ZMQTicketRegistry(
-		addresses,
-		addresses[0],
-		1500
-		2000);
+                addresses,
+                addresses[0],
+                1500,
+                2000);
 
         Assert.assertTrue(registry.needsCallback());
     }
