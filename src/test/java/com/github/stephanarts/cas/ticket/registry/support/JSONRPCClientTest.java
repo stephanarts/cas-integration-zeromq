@@ -361,6 +361,7 @@ public class JSONRPCClientTest
     /**
      * testHeartbeat
      */
+    @Test
     public void testHeartbeat() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2225");
 
@@ -380,6 +381,7 @@ public class JSONRPCClientTest
     /**
      * testHeartbeatFailure
      */
+    @Test
     public void testHeartbeatFailure() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2230");
 
