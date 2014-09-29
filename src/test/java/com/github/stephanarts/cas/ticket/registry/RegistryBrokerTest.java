@@ -128,4 +128,23 @@ public class RegistryBrokerTest
 
         Assert.fail ("BootstrapException not thrown");
     }
+
+    @Test
+    public void testMissingLocalProvider() throws Exception {
+        String[] addresses = {"tcp://localhost:4444"};
+        RegistryBroker broker;
+        try {
+            broker = new RegistryBroker(
+                addresses,
+                "tcp://localhost:3456",
+                1500,
+                200);
+        } catch (Exception e) {
+            broker.close();
+            return;
+        }
+
+        broker.close();
+        Assert.fail("Exception not thrown");
+    }
 }
