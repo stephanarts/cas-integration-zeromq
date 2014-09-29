@@ -69,7 +69,7 @@ public class RegistryClientTest
 
     @Test
     public void testAddNullTicket() throws Exception {
-        String[] addresses = {"tcp://localhost:4440"};
+        String[] addresses = {"tcp://localhost:4441"};
         ZMQProvider provider = new ZMQProvider(addresses[0], "add", 200);
         RegistryClient client = new RegistryClient(addresses[0]);
 
@@ -92,7 +92,7 @@ public class RegistryClientTest
         final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
         when(ticket.getId()).thenReturn(ticketId);
 
-        String[] addresses = {"tcp://localhost:4440"};
+        String[] addresses = {"tcp://localhost:4442"};
         ZMQProvider provider = new ZMQProvider(addresses[0], "add", 200);
         RegistryClient client = new RegistryClient(addresses[0]);
 
