@@ -132,7 +132,7 @@ public class RegistryBrokerTest
     @Test
     public void testMissingLocalProvider() throws Exception {
         String[] addresses = {"tcp://localhost:4444"};
-        RegistryBroker broker;
+        RegistryBroker broker = null;
         try {
             broker = new RegistryBroker(
                 addresses,
@@ -144,7 +144,9 @@ public class RegistryBrokerTest
             return;
         }
 
-        broker.close();
+        if (broker != null) {
+            broker.close();
+        }
         Assert.fail("Exception not thrown");
     }
 }
