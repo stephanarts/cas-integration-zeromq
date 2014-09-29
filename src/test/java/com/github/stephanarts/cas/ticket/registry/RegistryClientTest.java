@@ -25,6 +25,7 @@ import org.jasig.cas.ticket.Ticket;
 import org.jasig.cas.ticket.ServiceTicket;
 
 import com.github.stephanarts.cas.ticket.registry.RegistryClient;
+import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
 
 import static org.mockito.Mockito.mock;
