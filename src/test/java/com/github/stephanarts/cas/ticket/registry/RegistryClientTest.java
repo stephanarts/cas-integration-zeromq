@@ -80,6 +80,9 @@ public class RegistryClientTest
         } catch (final JSONRPCException e) {
             provider.interrupt();
             return;
+        } catch (final Exception e) {
+            provider.interrupt();
+            Assert.fail("Wrong Exception thrown");
         }
 
         provider.interrupt();
@@ -101,6 +104,9 @@ public class RegistryClientTest
         try {
             client.addTicket(ticket);
         } catch (final JSONRPCException e) {
+            provider.interrupt();
+            Assert.fail("Adding ticket Failed");
+        } catch (final Exception e) {
             provider.interrupt();
             Assert.fail("Adding ticket Failed");
         }
