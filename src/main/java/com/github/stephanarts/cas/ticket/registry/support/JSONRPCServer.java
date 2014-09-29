@@ -158,19 +158,27 @@ public class JSONRPCServer extends Thread {
             if(items.pollin(0)) {
                 message = ZMsg.recvMsg(socket);
                 body = message.getLast();
-                msg = new String(body.getData());
-            
-                logger.debug("Got a message");
-
-                try {
-                    resp = handleJSONRPC(msg);
-
-                    logger.debug("Sent a reply");
+                byte[] d = body.getData();
+                if (d.length == 1 && d[0] == 0x0) {
+                    /* Send pong */
                     message.removeLast();
-                    message.addString(resp);
+                    message.addLast((byte)0x0);
                     message.send(this.socket);
-                } catch(final Exception e) {
-                    logger.warn(e.toString());
+                } else {
+                    msg = new String(body.getData());
+
+                    logger.debug("Got a message");
+
+                    try {
+                        resp = handleJSONRPC(msg);
+
+                        logger.debug("Sent a reply");
+                        message.removeLast();
+                        message.addString(resp);
+                        message.send(this.socket);
+                    } catch(final Exception e) {
+                        logger.warn(e.toString());
+                    }
                 }
             }
 
@@ -361,8 +369,6 @@ public class JSONRPCServer extends Thread {
     /**
      * Send a 'stop' message to the control socket.
      *
-     * NOTE:
-     * Maybe, doing this in the interrupt call is not a good idea.
      */
     public final void interrupt() {
         byte[] msg = new byte[1];
