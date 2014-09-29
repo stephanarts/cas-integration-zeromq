@@ -162,7 +162,7 @@ public class JSONRPCServer extends Thread {
                 if (d.length == 1 && d[0] == 0x0) {
                     /* Send pong */
                     message.removeLast();
-                    message.addLast((byte)0x0);
+                    message.addLast(new byte[] {0x0});
                     message.send(this.socket);
                 } else {
                     msg = new String(body.getData());

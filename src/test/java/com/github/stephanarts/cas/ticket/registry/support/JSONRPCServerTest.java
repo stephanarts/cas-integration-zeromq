@@ -31,6 +31,7 @@ import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMsg;
+import org.zeromq.ZFrame;
 
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCServer;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
@@ -404,29 +405,29 @@ public class JSONRPCServerTest
 
         Context context = ZMQ.context(1);
         Socket socket = context.socket(ZMQ.REQ);
-        PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+        PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
 
         server.start();
-        socket.connect("tcp://localhost:7896");
+        socket.connect("tcp://localhost:7897");
 
         socket.send(new byte[] {0x0}, 0);
 
         int rc = ZMQ.poll(items, 200);
         if(rc == -1) {
             Assert.fail("Poll failed");
-            continue;
         }
         if(items[0].isReadable()) {
-            ZMsg message = ZMsg.recvMsg(this.socket);
-            ZFrame body = messge.getLast();
+            ZMsg message = ZMsg.recvMsg(socket);
+            ZFrame body = message.getLast();
             byte[] d = body.getData();
 
             socket.close();
             context.close();
             server.interrupt();
 
-            Assert.assertEquals(1, d.length)
-            Assert.assertEquals(0x0, d[0])
+            Assert.assertEquals(1, d.length);
+            Assert.assertEquals(0x0, d[0]);
+            return;
         }
 
         socket.close();
