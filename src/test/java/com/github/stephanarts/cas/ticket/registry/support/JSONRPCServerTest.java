@@ -397,4 +397,42 @@ public class JSONRPCServerTest
         context.close();
         server.interrupt();
     }
+
+    @Test
+    public void testHeartbeat() throws Exception {
+        JSONRPCServer server = new JSONRPCServer("tcp://localhost:7897");
+
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+        PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+
+        server.start();
+        socket.connect("tcp://localhost:7896");
+
+        socket.send(new byte[] {0x0}, 0);
+
+        int rc = ZMQ.poll(items, 200);
+        if(rc == -1) {
+            Assert.fail("Poll failed");
+            continue;
+        }
+        if(items[0].isReadable()) {
+            ZMsg message = ZMsg.recvMsg(this.socket);
+            ZFrame body = messge.getLast();
+            byte[] d = body.getData();
+
+            socket.close();
+            context.close();
+            server.interrupt();
+
+            Assert.assertEquals(1, d.length)
+            Assert.assertEquals(0x0, d[0])
+        }
+
+        socket.close();
+        context.close();
+        server.interrupt();
+
+        Assert.fail("No heartbeat received.");
+    }
 }
