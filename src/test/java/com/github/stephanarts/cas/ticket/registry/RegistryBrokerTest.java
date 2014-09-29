@@ -140,7 +140,6 @@ public class RegistryBrokerTest
                 1500,
                 200);
         } catch (Exception e) {
-            broker.close();
             return;
         }
 
