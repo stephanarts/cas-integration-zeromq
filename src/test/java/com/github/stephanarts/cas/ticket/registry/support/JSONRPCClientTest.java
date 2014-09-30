@@ -363,7 +363,7 @@ public class JSONRPCClientTest
      */
     @Test
     public void testHeartbeat() throws Exception {
-        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2225");
+        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2222");
 
         c.connect();
 
