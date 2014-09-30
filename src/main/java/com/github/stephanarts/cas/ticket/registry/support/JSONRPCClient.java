@@ -182,6 +182,13 @@ public class JSONRPCClient {
     }
 
     /**
+     * Return the connectURI.
+     */
+    public String getConnectURI() {
+        return this.connectUri;
+    }
+
+    /**
      * Send a heartbeat message.
      *
      * This is actually no json-rpc, but just a single '0x0' byte.
