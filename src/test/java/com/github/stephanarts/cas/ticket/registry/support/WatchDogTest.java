@@ -60,4 +60,9 @@ public class WatchDogTest
     public static void afterTest() {
     }
 
+    @Test
+    public void testConstructor() throws Exception {
+        WatchDog w = new WatchDog();
+    }
+
 }
