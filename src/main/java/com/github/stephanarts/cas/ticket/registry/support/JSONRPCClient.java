@@ -64,9 +64,9 @@ public class JSONRPCClient {
     private final int requestTimeout;
 
     /**
-     * HeartbeatTimeout.
+     * PaceMaker.
      */
-    private int heartbeatTimeout = 200;
+    private final PaceMaker pacemaker;
 
     /**
      * Create a JSONRPCClient object.
@@ -82,6 +82,8 @@ public class JSONRPCClient {
         this.requestTimeout = 1500;
 
         this.socket = this.context.socket(ZMQ.REQ);
+
+        this.pacemaker = PaceMaker.getInstance();
     }
 
     /**
@@ -127,50 +129,43 @@ public class JSONRPCClient {
 
         logger.trace("Sending data...");
 
-        /* Use a syncrhonized statement to prevent
-         * json-rpc calls and heartbeat messages to
-         * interfere.
-         */
-        synchronized(this) {
-            this.socket.send(request.toString(), 0);
+        this.socket.send(request.toString(), 0);
 
-            PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+        PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
 
-            logger.trace("Waiting for response data...");
-            int rc = ZMQ.poll(items, this.requestTimeout);
-            if(rc == -1) {
-                throw new JSONRPCException(-32603, "Internal error");
+        logger.trace("Waiting for response data...");
+        int rc = ZMQ.poll(items, this.requestTimeout);
+        if(rc == -1) {
+            throw new JSONRPCException(-32603, "Internal error");
+        }
+
+        if(items[0].isReadable()) {
+            // We got a reply from the server, must match sequence
+            ZMsg message = ZMsg.recvMsg(socket);
+
+            try {
+                response = new JSONObject(new String(message.getLast().getData()));
+            } catch(final JSONException e) {
+                throw new JSONRPCException(-32700, "Parse error");
             }
-
-            if(items[0].isReadable()) {
-                // We got a reply from the server, must match sequence
-                ZMsg message = ZMsg.recvMsg(socket);
-
-                try {
-                    response = new JSONObject(new String(message.getLast().getData()));
-                } catch(final JSONException e) {
-                    throw new JSONRPCException(-32700, "Parse error");
-                }
-                if (response.has("result")) {
-                    result = response.getJSONObject("result");
-                    return result;
-                }
-                if (response.has("error")) {
-                    error = response.getJSONObject("error");
-                    throw new JSONRPCException(error.getInt("code"), error.getString("message"));
-                }
-                throw new JSONRPCException(-32603, "Internal error");
-            } else {
-                logger.debug("Failed to get reply from {}", this.connectUri);
-
-                cleanup();
-                connect();
+            if (response.has("result")) {
+                result = response.getJSONObject("result");
+                return result;
             }
+            if (response.has("error")) {
+                error = response.getJSONObject("error");
+                throw new JSONRPCException(error.getInt("code"), error.getString("message"));
+            }
+            throw new JSONRPCException(-32603, "Internal error");
+        } else {
+            logger.debug("Failed to get reply from {}", this.connectUri);
+
+            cleanup();
+            connect();
         }
 
         throw new JSONRPCException(-32300, "Request Timeout");
     }
-
 
     /**
      * Cleanup.
@@ -183,41 +178,11 @@ public class JSONRPCClient {
 
     /**
      * Return the connectURI.
+     *
+     * @return ConnectURI of configured end-point.
      */
-    public String getConnectURI() {
+    public final String getConnectURI() {
         return this.connectUri;
-    }
-
-    /**
-     * Send a heartbeat message.
-     *
-     * This is actually no json-rpc, but just a single '0x0' byte.
-     * It is done to keep the heartbeat overhead low.
-     *
-     * @throws HeartbeatException when a heartbeat fails
-     *
-     */
-    public final void heartbeat() throws HeartbeatException {
-        synchronized(this) {
-
-            this.socket.send(new byte[] {0x0}, 0);
-
-            PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
-            int rc = ZMQ.poll(items, this.heartbeatTimeout);
-            if(rc == -1) {
-                throw new HeartbeatException("Poll failed");
-            }
-            if(items[0].isReadable()) {
-                ZMsg message = ZMsg.recvMsg(this.socket);
-
-                logger.warn("Heartbeat received");
-            } else {
-                logger.warn("Heartbeat missed");
-                cleanup();
-                connect();
-                throw new HeartbeatException("Heartbeat missed");
-            }
-        }
     }
 
 }

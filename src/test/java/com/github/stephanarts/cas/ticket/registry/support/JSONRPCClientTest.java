@@ -236,6 +236,7 @@ public class JSONRPCClientTest
      * Handing 5000 valid Responses.
      *
      */
+    @Ignore
     @Test
     public void testValidEndurance() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2222");
@@ -261,6 +262,7 @@ public class JSONRPCClientTest
      * Handing 5000 application errors.
      *
      */
+    @Ignore
     @Test
     public void testErrorEndurance() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:2224");
@@ -359,42 +361,14 @@ public class JSONRPCClientTest
     }
 
     /**
-     * testHeartbeat
+     * Test if getConnectURI returns the URI.
      */
     @Test
-    public void testHeartbeat() throws Exception {
-        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2222");
+    public void testGetConnectURI() throws Exception {
+        String uri = new String("tcp://localhost:1010");
+        JSONRPCClient c = new JSONRPCClient(uri);
 
-        c.connect();
-
-        try {
-            c.heartbeat();
-        } catch (final HeartbeatException e) {
-            c.disconnect();
-            Assert.fail(e.getMessage());
-            return;
-        }
-
-        c.disconnect();
+        Assert.assertTrue("getConnectURI does not return the correct URI", uri.equals(c.getConnectURI()));
     }
 
-    /**
-     * testHeartbeatFailure
-     */
-    @Test
-    public void testHeartbeatFailure() throws Exception {
-        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2230");
-
-        c.connect();
-
-        try {
-            c.heartbeat();
-        } catch (final HeartbeatException e) {
-            c.disconnect();
-            return;
-        }
-
-        c.disconnect();
-        Assert.fail("No exception thrown");
-    }
 }
