@@ -23,7 +23,7 @@ import org.zeromq.ZMQ.Context;
 import org.zeromq.ZMQ.Socket;
 //import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMQ.Poller;
-//import org.zeromq.ZMsg;
+import org.zeromq.ZMsg;
 
 /**
  * WatchDog class.
@@ -41,6 +41,11 @@ public class WatchDog extends Thread {
     private final Context context;
 
     /**
+     * ZMQ Control Socket.
+     */
+    private final Socket  controlSocket;
+
+    /**
      * ZMQ Sockets.
      */
     private Socket[]  sockets = null;
@@ -55,6 +60,12 @@ public class WatchDog extends Thread {
      */
     private int heartbeatInterval = 5000;
 
+    private static int NR = 0;
+
+    private static Object NRLOCK = new Object();
+
+    private final int nr;
+
     /**
      * Create a WatchDog object.
      *
@@ -63,6 +74,12 @@ public class WatchDog extends Thread {
 
         this.context = ZMQ.context(1);
 
+        this.controlSocket = this.context.socket(ZMQ.PULL);
+
+        synchronized(this.NRLOCK) {
+            this.NR++;
+            this.nr = this.NR;
+        }
     }
 
     /**
@@ -90,11 +107,17 @@ public class WatchDog extends Thread {
      */
     public final void run() {
 
+        int controlSocketIndex = 0;
+
+        ZMsg   message;
+
         while(!Thread.currentThread().isInterrupted()) {
             try {
                 Thread.sleep(this.heartbeatInterval);
 
-                Poller items = new Poller(this.sockets.length);
+                Poller items = new Poller(this.sockets.length+1);
+
+                controlSocketIndex = items.register(this.controlSocket, Poller.POLLIN);
 
                 for(int i = 0; i < this.sockets.length; ++i) {
                     this.sockets[i].send(new byte[] {0x0}, 0);
@@ -103,9 +126,29 @@ public class WatchDog extends Thread {
 
                 items.poll(this.heartbeatTimeout);
 
+                if(items.pollin(controlSocketIndex)) {
+                    message = ZMsg.recvMsg(controlSocket);
+                    logger.debug("Received STOP message [" + this.nr + "]");
+                    break;
+                }
+
             } catch (final InterruptedException ex) {
                 break;
             }
         }
+    }
+
+    /**
+     * Send a 'stop' message to the control socket.
+     *
+     */
+    public final void interrupt() {
+        byte[] msg = new byte[1];
+        Socket s = this.context.socket(ZMQ.PUSH);
+        s.connect("inproc://watchdog-"+this.nr);
+        s.send(msg, ZMQ.NOBLOCK);
+        s.close();
+        logger.debug("Sent a STOP Message to inproc://watchdog-"+this.nr);
+        //super.interrupt();
     }
 }
