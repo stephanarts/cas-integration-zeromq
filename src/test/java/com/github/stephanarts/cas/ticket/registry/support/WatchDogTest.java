@@ -71,7 +71,7 @@ public class WatchDogTest
         w.start();
         Assert.assertTrue(w.isAlive());
         w.interrupt();
-        w.join(5000);
+        w.join();
         Assert.assertFalse(w.isAlive());
     }
 
