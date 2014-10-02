@@ -84,6 +84,7 @@ public class JSONRPCClient {
         this.socket = this.context.socket(ZMQ.REQ);
 
         this.pacemaker = PaceMaker.getInstance();
+        this.pacemaker.addClient(this);
     }
 
     /**

@@ -412,7 +412,7 @@ public class JSONRPCServerTest
 
         socket.send(new byte[] {0x0}, 0);
 
-        int rc = ZMQ.poll(items, 200);
+        int rc = ZMQ.poll(items, 10000);
         if(rc == -1) {
             Assert.fail("Poll failed");
         }
@@ -443,7 +443,7 @@ public class JSONRPCServerTest
         s.start();
         Assert.assertTrue(s.isAlive());
         s.interrupt();
-        s.join(5000);
+        s.join();
         Assert.assertFalse(s.isAlive());
     }
 }
