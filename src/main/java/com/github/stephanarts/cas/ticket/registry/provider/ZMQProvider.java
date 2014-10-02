@@ -34,10 +34,15 @@ public class ZMQProvider extends JSONRPCServer {
      * Logging Class.
      */
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
     
     private final HashMap<Integer, Ticket> ticketMap =
             new HashMap<Integer, Ticket>();
+
+    /**
+     * Counter for Thread-name.
+     */
+    private static int NR = 0;
+
     /**
      *  Create a ZMQProvider.
      *
@@ -50,6 +55,10 @@ public class ZMQProvider extends JSONRPCServer {
             final String uniqueId,
             final int heartbeatInterval) {
         super(bindUri);
+
+        NR++;
+
+        this.setName("ZMQProvider-"+NR);
 
         try {
             registerMethod("cas.addTicket", new AddMethod(this.ticketMap));
