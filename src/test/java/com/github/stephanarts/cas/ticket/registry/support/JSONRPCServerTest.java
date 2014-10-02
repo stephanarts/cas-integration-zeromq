@@ -436,4 +436,14 @@ public class JSONRPCServerTest
 
         Assert.fail("No heartbeat received.");
     }
+
+    @Test
+    public void testLifeCycle() throws Exception {
+        JSONRPCServer s = new JSONRPCServer("tcp://localhost:7900");
+        s.start();
+        Assert.assertTrue(s.isAlive());
+        s.interrupt();
+        s.join(5000);
+        Assert.assertFalse(s.isAlive());
+    }
 }

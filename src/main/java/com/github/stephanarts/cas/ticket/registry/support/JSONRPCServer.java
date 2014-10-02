@@ -73,7 +73,6 @@ public class JSONRPCServer extends Thread {
 
     private final int nr;
 
-
     /**
      * Create a JSONRPCServer object.
      *

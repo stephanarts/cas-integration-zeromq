@@ -65,4 +65,14 @@ public class WatchDogTest
         WatchDog w = new WatchDog();
     }
 
+    @Test
+    public void testLifeCycle() throws Exception {
+        WatchDog w = new WatchDog();
+        w.start();
+        Assert.assertTrue(w.isAlive());
+        w.interrupt();
+        w.join(5000);
+        Assert.assertFalse(w.isAlive());
+    }
+
 }

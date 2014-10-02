@@ -48,7 +48,7 @@ public class WatchDog extends Thread {
     /**
      * ZMQ Sockets.
      */
-    private Socket[]  sockets = null;
+    private Socket[]  sockets = {};
 
     /**
      * HeartbeatTimeout.
@@ -103,6 +103,19 @@ public class WatchDog extends Thread {
     }
 
     /**
+     * Start the WatchDog thread.
+     *
+     * Binds the sockets before calling Thread.start(), this way
+     * they are already bound before the first run() is executed.
+     */
+    public final void start() {
+        /** Bind Socket */
+        this.controlSocket.bind("inproc://watchdog-"+this.nr);
+        logger.debug("Starting WatchDog ["+this.nr+"]");
+        super.start();
+    }
+
+    /**
      * Run the heartbeat process.
      */
     public final void run() {
@@ -136,6 +149,8 @@ public class WatchDog extends Thread {
                 break;
             }
         }
+
+        this.controlSocket.close();
     }
 
     /**
