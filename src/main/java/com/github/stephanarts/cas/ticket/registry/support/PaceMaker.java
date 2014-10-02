@@ -43,7 +43,10 @@ public final class PaceMaker {
      * be instantiated using the getInstance() method.
      */
     private PaceMaker() {
+        this.workers = new WatchDog[1];
+        this.workers[0] = new WatchDog();
 
+        this.workers[0].start();
     }
 
     /**
