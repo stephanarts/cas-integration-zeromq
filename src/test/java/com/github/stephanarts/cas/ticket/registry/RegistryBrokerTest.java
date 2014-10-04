@@ -42,13 +42,19 @@ public class RegistryBrokerTest
     public void testConstructor() throws Exception {
         String[] addresses = {"tcp://localhost:4444"};
 
+        ZMQProvider provider = new ZMQProvider(
+                addresses[0],
+                "testConstructor");
+
+        provider.start();
+
         RegistryBroker broker = new RegistryBroker(
             addresses,
-            addresses[0],
             1500,
-            200);
+            200,
+            "testConstructor");
 
-        broker.close();
+        provider.interrupt();
     }
 
     @Test
@@ -59,12 +65,14 @@ public class RegistryBrokerTest
 
         String[] addresses = {"tcp://localhost:4440","tcp://localhost:4441"};
 
-        ZMQProvider provider = new ZMQProvider(addresses[1], "primary", 200);
+        ZMQProvider provider0 = new ZMQProvider(addresses[0], "primary");
+        ZMQProvider provider1 = new ZMQProvider(addresses[1], "secondary");
         RegistryClient populator = new RegistryClient(addresses[1]);
         RegistryClient checker = new RegistryClient(addresses[0]);
         RegistryBroker broker = null;
 
-        provider.start();
+        provider0.start();
+        provider1.start();
 
         populator.addTicket(ticket);
 
@@ -75,23 +83,21 @@ public class RegistryBrokerTest
          */
         broker = new RegistryBroker(
             addresses,
-            addresses[0],
             1500,
-            200);
+            200,
+            "primary");
 
         try {
             broker.bootstrap();
         } catch (final BootstrapException e) {
-            provider.interrupt();
-            broker.close();
-            Assert.fail("Bootstrapping Failed"); 
+            provider0.interrupt();
+            provider1.interrupt();
         }
 
         final ServiceTicket ticketFromRegistry = (ServiceTicket) checker.getTicket(ticketId);
 
-        provider.interrupt();
-
-        broker.close();
+        provider0.interrupt();
+        provider1.interrupt();
 
         Assert.assertNotNull(ticketFromRegistry);
         Assert.assertEquals(ticketId, ticketFromRegistry.getId());
@@ -105,6 +111,12 @@ public class RegistryBrokerTest
 
         String[] addresses = {"tcp://localhost:4440","tcp://localhost:4441"};
 
+        ZMQProvider provider = new ZMQProvider(
+                addresses[0],
+                "bootstrapFailure");
+
+        provider.start();
+
         RegistryBroker broker = null;
 
         /*
@@ -113,18 +125,18 @@ public class RegistryBrokerTest
          */
         broker = new RegistryBroker(
             addresses,
-            addresses[0],
             1500,
-            200);
+            200,
+            "bootstrapFailure");
 
         try {
             broker.bootstrap();
         } catch (final BootstrapException e) {
-            broker.close();
+            provider.interrupt();
             return;
         }
 
-        broker.close();
+        provider.interrupt();
 
         Assert.fail ("BootstrapException not thrown");
     }
@@ -136,16 +148,13 @@ public class RegistryBrokerTest
         try {
             broker = new RegistryBroker(
                 addresses,
-                "tcp://localhost:3456",
                 1500,
-                200);
+                200,
+                "missing");
         } catch (Exception e) {
             return;
         }
 
-        if (broker != null) {
-            broker.close();
-        }
         Assert.fail("Exception not thrown");
     }
 }

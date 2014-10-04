@@ -74,6 +74,7 @@ public class PaceMakerTest
         Assert.assertEquals(PaceMaker.getInstance(), PaceMaker.getInstance());
     }
 
+    @Ignore
     @Test
     public void testAddClient() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:1234");

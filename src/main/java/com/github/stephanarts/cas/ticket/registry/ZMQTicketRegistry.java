@@ -15,10 +15,13 @@
 package com.github.stephanarts.cas.ticket.registry;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import org.jasig.cas.ticket.Ticket;
 import org.jasig.cas.ticket.registry.AbstractDistributedTicketRegistry;
 import org.springframework.beans.factory.DisposableBean;
+
+import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
 
 /**
  * Ticket registry implementation that stores tickets via JSON-RPC
@@ -35,16 +38,24 @@ public final class ZMQTicketRegistry
      */
     //protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final String providerId = UUID.randomUUID().toString();
 
-    private RegistryBroker   registryBroker;
+    private final ZMQProvider provider;
+
+
+private RegistryBroker   registryBroker;
 
     /**
-     * Creates a new instance that stores tickets in the given ZMQ Registry-Providers.
+     * Creates a new TicketRegistry Backend.
      *
-     * @param providers                         Array of providers to connect to
-     * @param bindUri                           URI to bind the RegistryProvider on
-     * @param requestTimeout                    Timeout
-     * @param heartbeatInterval                 Interval
+     * An instance of the ZMQTicketRegistry stores
+     * CAS Tickets in a cluster of Registry-Providers.
+     *
+     * @param providers         Array of providers to connect to
+     * @param bindUri           URI to bind the RegistryProvider on
+     * @param requestTimeout    Timeout
+     * @param heartbeatTimeout  Timeout
+     * @param heartbeatInterval Interval
      *
      * @throws Exception if localProvider could not be found
      */
@@ -52,14 +63,21 @@ public final class ZMQTicketRegistry
                 final String[] providers,
                 final String bindUri,
                 final int requestTimeout,
+                final int heartbeatTimeout,
                 final int heartbeatInterval)
             throws Exception {
 
+        this.provider = new ZMQProvider(
+                bindUri,
+                this.providerId);
+
+        this.provider.start();
+
         this.registryBroker = new RegistryBroker(
                 providers,
-                bindUri,
                 requestTimeout,
-                heartbeatInterval);
+                heartbeatInterval,
+                this.providerId);
 
         try {
             this.registryBroker.bootstrap();
@@ -115,7 +133,7 @@ public final class ZMQTicketRegistry
      */
     @Override
     public void destroy() throws Exception {
-        this.registryBroker = null;
+        this.provider.interrupt();
         return;
     }
 

@@ -48,12 +48,10 @@ public class ZMQProvider extends JSONRPCServer {
      *
      *  @param bindUri    BindURI
      *  @param uniqueId   UniqueId used for identification.
-     *  @param heartbeatInterval interval (in ms) to send a heartbeat message to clients.
      */
     public ZMQProvider(
             final String bindUri,
-            final String uniqueId,
-            final int heartbeatInterval) {
+            final String uniqueId) {
         super(bindUri);
 
         NR++;

@@ -51,6 +51,7 @@ public class ZMQTicketRegistryTest
                 addresses,
                 addresses[0],
                 1500,
+                500,
                 2000);
 
         registry.addTicket(ticket);
@@ -75,6 +76,7 @@ public class ZMQTicketRegistryTest
                 addresses,
                 addresses[0],
                 1500,
+                500,
                 2000);
 
         registry.addTicket(ticket);
@@ -99,6 +101,7 @@ public class ZMQTicketRegistryTest
                 addresses,
                 addresses[0],
                 1500,
+                500,
                 2000);
 
         Assert.assertTrue(registry.needsCallback());

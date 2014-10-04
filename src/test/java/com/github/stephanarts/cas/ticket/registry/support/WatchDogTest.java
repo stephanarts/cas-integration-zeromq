@@ -65,6 +65,7 @@ public class WatchDogTest
         WatchDog w = new WatchDog();
     }
 
+    @Ignore
     @Test
     public void testLifeCycle() throws Exception {
         WatchDog w = new WatchDog();

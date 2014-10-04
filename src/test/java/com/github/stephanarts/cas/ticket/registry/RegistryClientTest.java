@@ -52,7 +52,7 @@ public class RegistryClientTest
         when(ticket.getId()).thenReturn(ticketId);
 
         String[] addresses = {"tcp://localhost:4440"};
-        ZMQProvider provider = new ZMQProvider(addresses[0], "add", 200);
+        ZMQProvider provider = new ZMQProvider(addresses[0], "add");
         RegistryClient client = new RegistryClient(addresses[0]);
 
         provider.start();
@@ -70,7 +70,7 @@ public class RegistryClientTest
     @Test
     public void testAddNullTicket() throws Exception {
         String[] addresses = {"tcp://localhost:4441"};
-        ZMQProvider provider = new ZMQProvider(addresses[0], "add", 200);
+        ZMQProvider provider = new ZMQProvider(addresses[0], "add");
         RegistryClient client = new RegistryClient(addresses[0]);
 
         provider.start();
@@ -96,7 +96,7 @@ public class RegistryClientTest
         when(ticket.getId()).thenReturn(ticketId);
 
         String[] addresses = {"tcp://localhost:4442"};
-        ZMQProvider provider = new ZMQProvider(addresses[0], "add", 200);
+        ZMQProvider provider = new ZMQProvider(addresses[0], "add");
         RegistryClient client = new RegistryClient(addresses[0]);
 
         provider.start();

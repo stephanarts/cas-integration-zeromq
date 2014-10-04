@@ -20,11 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.ArrayList;
-import java.util.UUID;
 
 import org.jasig.cas.ticket.Ticket;
 
-import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 
 /**
@@ -39,10 +37,6 @@ public final class RegistryBroker {
      * Logging Class.
      */
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
-    private final ZMQProvider provider;
-
-    private final String providerId = UUID.randomUUID().toString();
 
     private RegistryClient[] providers;
 
@@ -59,18 +53,19 @@ public final class RegistryBroker {
      * The RegistryBroker stores tickets in the given
      * ZMQ Registry-Providers.
      *
-     * @param providers  Array of providers to connect to
-     * @param bindUri    URI to bind the RegistryProvider on
-     * @param requestTimeout timeout for client requests.
+     * @param providers         Array of providers to connect to
+     * @param requestTimeout    timeout for client requests.
      * @param heartbeatInterval heartbeat interval for local provider.
+     * @param localProviderId   id that matches the 'local' provider
+     *                          used for quick lookups.
      *
      * @throws Exception if localProvider could not be found
      */
     public RegistryBroker(
                 final String[] providers,
-                final String bindUri,
                 final int requestTimeout,
-                final int heartbeatInterval)
+                final int heartbeatInterval,
+                final String localProviderId)
             throws Exception {
 
         RegistryClient client;
@@ -78,17 +73,13 @@ public final class RegistryBroker {
 
         this.requestTimeout = requestTimeout;
 
-        this.provider = new ZMQProvider(bindUri, this.providerId, heartbeatInterval);
-
-        this.provider.start();
-
         this.providers = new RegistryClient[providers.length];
 
         for(int i = 0; i < this.providers.length; ++i) {
             client = new RegistryClient(providers[i]);
             try {
                 id = client.getProviderId();
-                if (this.providerId.equals(id)) {
+                if (localProviderId.equals(id)) {
                     this.localProvider = client;
                 }
             } catch (final JSONRPCException e) {
@@ -232,17 +223,6 @@ public final class RegistryBroker {
     }
 
     /**
-     * Destroy the Broker.
-     *
-     * @throws Exception when destruction fails.
-     */
-    public void destroy() throws Exception {
-        this.close();
-        return;
-    }
-
-
-    /**
      * getTickets.
      *
      * Get all tickets from the registry,
@@ -259,13 +239,5 @@ public final class RegistryBroker {
         }
 
         return tickets;
-    }
-
-    /**
-     * Close the RegistryBroker.
-     *
-     */
-    public void close() {
-        this.provider.interrupt();
     }
 }
