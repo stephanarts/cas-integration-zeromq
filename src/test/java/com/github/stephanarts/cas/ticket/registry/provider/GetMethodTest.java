@@ -23,6 +23,8 @@ import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.ObjectOutputStream;
+
 import org.json.JSONObject;
 
 import org.jasig.cas.ticket.Ticket;
@@ -35,11 +37,18 @@ import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+import static org.mockito.Matchers.*;
+
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
 
 /**
  * Unit test for GetMethod.
  */
-@RunWith(JUnit4.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(GetMethod.class)
 public class GetMethodTest
 {
     @Test
@@ -128,7 +137,7 @@ public class GetMethodTest
         Assert.fail("No Exception Thrown");
     }
 
-    @Ignore
+//    @Ignore
     @Test
     public void testSerializationError() throws Exception {
         final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
@@ -137,8 +146,11 @@ public class GetMethodTest
         final JSONObject result;
 
         final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
 
-        map.put(ticketId.hashCode(), null);
+        PowerMockito.whenNew(ObjectOutputStream.class).withAnyArguments().thenThrow(new Exception("broken"));
+
+        map.put(ticketId.hashCode(), ticket);
 
         params.put("ticket-id", ticketId);
 
