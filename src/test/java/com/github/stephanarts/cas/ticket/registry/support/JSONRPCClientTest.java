@@ -371,4 +371,39 @@ public class JSONRPCClientTest
         Assert.assertTrue("getConnectURI does not return the correct URI", uri.equals(c.getConnectURI()));
     }
 
+    /**
+     * Test if sejreturns the URI.
+     */
+    @Test
+    public void testAvailability() throws Exception {
+        String uri = new String("tcp://localhost:1010");
+        JSONRPCClient c = new JSONRPCClient(uri);
+        boolean available = false;
+
+        /**
+         * Set the available bit to true.
+         * Don't assume a default.
+         */
+        c.setAvailable(true);
+
+        available = c.getAvailable();
+
+        /**
+         * Check if the value equals true.
+         */
+        Assert.assertTrue(available);
+
+        /**
+         * Set the available bit to false.
+         */
+        c.setAvailable(false);
+
+        available = c.getAvailable();
+
+        /**
+         * Check if the value equals false.
+         */
+        Assert.assertFalse(available);
+    }
+
 }

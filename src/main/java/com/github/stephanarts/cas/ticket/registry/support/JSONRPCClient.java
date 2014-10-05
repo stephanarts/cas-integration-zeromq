@@ -69,6 +69,14 @@ public class JSONRPCClient {
     private final PaceMaker pacemaker;
 
     /**
+     * Available, indicates if the server that
+     * this client connects to is available.
+     *
+     * It can be set by a watchdog process.
+     */
+    private boolean available = true;
+
+    /**
      * Create a JSONRPCClient object.
      *
      * @param connectUri   The URI to connect to
@@ -187,6 +195,20 @@ public class JSONRPCClient {
      */
     public final String getConnectURI() {
         return this.connectUri;
+    }
+
+    /**
+     * Return if the server is available.
+     */
+    public final boolean getAvailable() {
+        return this.available;
+    }
+
+    /**
+     * Set if the server is available.
+     */
+    public final void setAvailable(final boolean available) {
+        this.available = available;
     }
 
 }

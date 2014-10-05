@@ -109,9 +109,13 @@ public final class RegistryBroker {
         for (int i = 0; i < this.providers.length; ++i) {
             /* Bootstrap the localProvider */
             if (this.providers[i] != this.localProvider) {
-                try {
-                    tickets = this.providers[i].getTickets();
-                } catch (final JSONRPCException e) {
+                if (this.providers[i].getAvailable()) {
+                    try {
+                        tickets = this.providers[i].getTickets();
+                    } catch (final JSONRPCException e) {
+                        continue;
+                    }
+                } else {
                     continue;
                 }
 
@@ -145,7 +149,9 @@ public final class RegistryBroker {
 
         for(int i = 0; i < this.providers.length; ++i) {
             try {
-                this.providers[i].updateTicket(ticket);
+                if (this.providers[i].getAvailable()) {
+                    this.providers[i].updateTicket(ticket);
+                }
             } catch (final JSONRPCException e) {
                 logger.error(e.getMessage());
             }
@@ -162,7 +168,9 @@ public final class RegistryBroker {
 
         for(int i = 0; i < this.providers.length; ++i) {
             try {
-                this.providers[i].addTicket(ticket);
+                if (this.providers[i].getAvailable()) {
+                    this.providers[i].addTicket(ticket);
+                }
             } catch (final JSONRPCException e) {
                 logger.error(e.getMessage());
             }
