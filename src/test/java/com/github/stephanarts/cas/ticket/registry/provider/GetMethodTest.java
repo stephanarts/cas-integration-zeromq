@@ -137,7 +137,6 @@ public class GetMethodTest
         Assert.fail("No Exception Thrown");
     }
 
-//    @Ignore
     @Test
     public void testSerializationError() throws Exception {
         final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
