@@ -15,8 +15,8 @@
 
 package com.github.stephanarts.cas.ticket.registry.support;
 
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 
@@ -26,6 +26,11 @@ import java.util.LinkedList;
  * The pacemaker class, a singleton.
  */
 public final class PaceMaker {
+
+    /**
+     * Logging Class.
+     */
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private static PaceMaker INSTANCE = null;
 
@@ -105,9 +110,36 @@ public final class PaceMaker {
                 b++;
             }
 
-            this.workers[i].interrupt();
             this.workers[i].setClients(aClients);
-            this.workers[i].start();
         }
+    }
+
+    /**
+     * removeClient.
+     *
+     * @param client JSONRPCClient.
+     */
+    public void removeClient(final JSONRPCClient client) {
+
+        int b = 0;
+
+        this.clients.remove(client);
+
+        for(int i = 0; i < this.workers.length; ++i) {
+
+            JSONRPCClient[] aClients = new JSONRPCClient[this.clients.size()/this.workers.length];
+
+            for(int c = 0; c < aClients.length; ++c) {
+                if (b < this.clients.size()) {
+                    aClients[c] = this.clients.get(b);
+                } else {
+                    aClients[c] = null;
+                }
+                b++;
+            }
+
+            this.workers[i].setClients(aClients);
+        }
+ 
     }
 }

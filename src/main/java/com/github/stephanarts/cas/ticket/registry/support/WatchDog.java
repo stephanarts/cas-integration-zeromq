@@ -49,6 +49,7 @@ public class WatchDog extends Thread {
      * ZMQ Sockets.
      */
     private Socket[]  sockets = {};
+    private JSONRPCClient[]  clients = {};
 
     /**
      * HeartbeatTimeout.
@@ -90,15 +91,20 @@ public class WatchDog extends Thread {
     public final void setClients(final JSONRPCClient[] clients) {
 
         /* Clean up old sockets */
-        for(int i = 0; i < this.sockets.length; ++i) {
-            this.sockets[i].setLinger(0);
-            this.sockets[i].close();
-        }
+        synchronized(this) {
 
-        this.sockets = new Socket[clients.length];
-        for(int i = 0; i < this.sockets.length; ++i) {
-            this.sockets[i] = this.context.socket(ZMQ.REQ);
-            this.sockets[i].connect(clients[i].getConnectURI());
+            this.clients = clients;
+
+            for(int i = 0; i < this.sockets.length; ++i) {
+                this.sockets[i].setLinger(0);
+                this.sockets[i].close();
+            }
+
+            this.sockets = new Socket[clients.length];
+            for(int i = 0; i < this.sockets.length; ++i) {
+                this.sockets[i] = this.context.socket(ZMQ.REQ);
+                this.sockets[i].connect(clients[i].getConnectURI());
+            }
         }
     }
 
@@ -124,29 +130,46 @@ public class WatchDog extends Thread {
 
         ZMsg   message;
 
+        Poller items = new Poller(2);
+
+        controlSocketIndex = items.register(this.controlSocket, Poller.POLLIN);
+
         while(!Thread.currentThread().isInterrupted()) {
             try {
                 Thread.sleep(this.heartbeatInterval);
 
-                Poller items = new Poller(this.sockets.length+1);
+                synchronized(this) {
+                    for(int i = 0; i < this.sockets.length; ++i) {
 
-                controlSocketIndex = items.register(this.controlSocket, Poller.POLLIN);
+                        int index = items.register(this.sockets[i], Poller.POLLIN);
+                        this.sockets[i].send(new byte[] {0x0}, 0);
 
-                for(int i = 0; i < this.sockets.length; ++i) {
-                    this.sockets[i].send(new byte[] {0x0}, 0);
-                    items.register(this.sockets[i], Poller.POLLIN);
+                        items.poll(this.heartbeatTimeout);
+
+                        if(items.pollin(controlSocketIndex)) {
+                            message = ZMsg.recvMsg(controlSocket);
+                            logger.debug("Received STOP message [" + this.nr + "]");
+                            break;
+                        }
+
+                        if(items.pollin(index)) {
+                            message = ZMsg.recvMsg(this.sockets[i]);
+                        } else {
+                            logger.debug("Missed Heartbeat");
+
+                            this.sockets[i].setLinger(0);
+                            this.sockets[i].close();
+
+                            this.sockets[i] = this.context.socket(ZMQ.REQ);
+                            this.sockets[i].connect(this.clients[i].getConnectURI());
+                        }
+
+                        items.unregister(this.sockets[i]);
+
+                    }
                 }
-
-                items.poll(this.heartbeatTimeout);
-
-                if(items.pollin(controlSocketIndex)) {
-                    message = ZMsg.recvMsg(controlSocket);
-                    logger.debug("Received STOP message [" + this.nr + "]");
-                    break;
-                }
-
             } catch (final InterruptedException ex) {
-                break;
+                    break;
             }
         }
 
