@@ -139,11 +139,36 @@ public class WatchDog extends Thread {
                 Thread.sleep(this.heartbeatInterval);
 
                 synchronized(this) {
-                    for(int i = 0; i < this.sockets.length; ++i) {
+                    if (this.sockets.length > 0) {
+                        for(int i = 0; i < this.sockets.length; ++i) {
 
-                        int index = items.register(this.sockets[i], Poller.POLLIN);
-                        this.sockets[i].send(new byte[] {0x0}, 0);
+                            int index = items.register(this.sockets[i], Poller.POLLIN);
+                            this.sockets[i].send(new byte[] {0x0}, 0);
 
+                            items.poll(this.heartbeatTimeout);
+
+                            if(items.pollin(controlSocketIndex)) {
+                                message = ZMsg.recvMsg(controlSocket);
+                                logger.debug("Received STOP message [" + this.nr + "]");
+                                break;
+                            }
+
+                            if(items.pollin(index)) {
+                                message = ZMsg.recvMsg(this.sockets[i]);
+                            } else {
+                                logger.debug("Missed Heartbeat");
+
+                                this.sockets[i].setLinger(0);
+                                this.sockets[i].close();
+
+                                this.sockets[i] = this.context.socket(ZMQ.REQ);
+                                this.sockets[i].connect(this.clients[i].getConnectURI());
+                            }
+
+                            items.unregister(this.sockets[i]);
+
+                        }
+                    } else {
                         items.poll(this.heartbeatTimeout);
 
                         if(items.pollin(controlSocketIndex)) {
@@ -151,21 +176,6 @@ public class WatchDog extends Thread {
                             logger.debug("Received STOP message [" + this.nr + "]");
                             break;
                         }
-
-                        if(items.pollin(index)) {
-                            message = ZMsg.recvMsg(this.sockets[i]);
-                        } else {
-                            logger.debug("Missed Heartbeat");
-
-                            this.sockets[i].setLinger(0);
-                            this.sockets[i].close();
-
-                            this.sockets[i] = this.context.socket(ZMQ.REQ);
-                            this.sockets[i].connect(this.clients[i].getConnectURI());
-                        }
-
-                        items.unregister(this.sockets[i]);
-
                     }
                 }
             } catch (final InterruptedException ex) {
