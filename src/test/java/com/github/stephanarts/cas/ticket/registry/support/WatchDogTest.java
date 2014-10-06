@@ -40,10 +40,20 @@ import org.zeromq.ZFrame;
 
 import com.github.stephanarts.cas.ticket.registry.support.WatchDog;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+import static org.mockito.Matchers.*;
+
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
 /**
  * Unit test for WatchDog.
  */
-@RunWith(JUnit4.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(WatchDog.class)
 public class WatchDogTest 
 {
 
@@ -72,6 +82,19 @@ public class WatchDogTest
         Assert.assertTrue(w.isAlive());
         w.interrupt();
         w.join();
+        Assert.assertFalse(w.isAlive());
+    }
+
+    @Test
+    public void testSleepInterrupt() throws Exception {
+        WatchDog w = new WatchDog();
+
+        PowerMockito.mockStatic(Thread.class);
+        PowerMockito.doThrow(new InterruptedException()).when(Thread.class);
+
+        w.start();
+        w.join();
+
         Assert.assertFalse(w.isAlive());
     }
 

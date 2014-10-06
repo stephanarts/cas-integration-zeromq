@@ -156,8 +156,11 @@ public class WatchDog extends Thread {
                             if(items.pollin(index)) {
                                 message = ZMsg.recvMsg(this.sockets[i]);
                                 this.clients[i].setAvailable(true);
+
+                                items.unregister(this.sockets[i]);
                             } else {
                                 logger.debug("Missed Heartbeat");
+                                items.unregister(this.sockets[i]);
 
                                 this.sockets[i].setLinger(0);
                                 this.sockets[i].close();
@@ -167,8 +170,6 @@ public class WatchDog extends Thread {
                                 this.sockets[i] = this.context.socket(ZMQ.REQ);
                                 this.sockets[i].connect(this.clients[i].getConnectURI());
                             }
-
-                            items.unregister(this.sockets[i]);
 
                         }
                     } else {
