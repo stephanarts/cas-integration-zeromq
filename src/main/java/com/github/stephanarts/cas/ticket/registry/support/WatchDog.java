@@ -183,7 +183,7 @@ public class WatchDog extends Thread {
                     }
                 }
             } catch (final InterruptedException ex) {
-                    break;
+                break;
             }
         }
 
