@@ -153,7 +153,7 @@ public final class RegistryBroker {
                     this.providers[i].updateTicket(ticket);
                 }
             } catch (final JSONRPCException e) {
-                logger.error(e.getMessage());
+                logger.error("updateTicket error: " + e.getMessage());
             }
         }
     }
@@ -172,7 +172,7 @@ public final class RegistryBroker {
                     this.providers[i].addTicket(ticket);
                 }
             } catch (final JSONRPCException e) {
-                logger.error(e.getMessage());
+                logger.error("addTicket error: " + e.getMessage());
             }
         }
     }
@@ -189,9 +189,11 @@ public final class RegistryBroker {
 
         for(int i = 0; i < this.providers.length; ++i) {
             try {
-                this.providers[i].deleteTicket(ticketId);
+                if (this.providers[i].getAvailable()) {
+                    this.providers[i].deleteTicket(ticketId);
+                }
             } catch (final JSONRPCException e) {
-                logger.error(e.getMessage());
+                logger.error("deleteTicket error: " + e.getMessage());
             }
         }
 
@@ -215,7 +217,7 @@ public final class RegistryBroker {
             ticket = this.localProvider.getTicket(ticketId);
             return ticket;
         } catch (final JSONRPCException e) {
-            logger.error(e.getMessage());
+            logger.error("getTicket error: " + e.getMessage());
         }
 
         return null;
@@ -234,7 +236,7 @@ public final class RegistryBroker {
         try {
             tickets = this.localProvider.getTickets();
         } catch (final JSONRPCException e) {
-            logger.error(e.getMessage());
+            logger.error("getTickets error: " + e.getMessage());
         }
 
         return tickets;
