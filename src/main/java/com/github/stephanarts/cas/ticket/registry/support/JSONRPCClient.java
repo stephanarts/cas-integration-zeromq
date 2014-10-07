@@ -80,8 +80,11 @@ public class JSONRPCClient {
      * Create a JSONRPCClient object.
      *
      * @param connectUri   The URI to connect to
+     * @param pacemaker    Pacemaker instance
      */
-    public JSONRPCClient(final String connectUri) {
+    public JSONRPCClient(
+            final String connectUri,
+            final PaceMaker pacemaker) {
 
         this.context = ZMQ.context(1);
 
@@ -91,8 +94,17 @@ public class JSONRPCClient {
 
         this.socket = this.context.socket(ZMQ.REQ);
 
-        this.pacemaker = PaceMaker.getInstance();
-        this.pacemaker.addClient(this);
+        this.pacemaker = pacemaker;
+    }
+
+    /**
+     * Create a JSONRPCClient object.
+     *
+     * @param connectUri   The URI to connect to
+     */
+    public JSONRPCClient(
+            final String connectUri) {
+        this(connectUri, null);
     }
 
     /**
@@ -102,7 +114,9 @@ public class JSONRPCClient {
 
         this.socket.connect(this.connectUri);
 
-        this.pacemaker.addClient(this);
+        if (this.pacemaker != null) {
+            this.pacemaker.addClient(this);
+        }
     }
 
     /**
@@ -111,7 +125,9 @@ public class JSONRPCClient {
     public final void disconnect() {
         this.socket.close();
 
-        this.pacemaker.removeClient(this);
+        if (this.pacemaker != null) {
+            this.pacemaker.removeClient(this);
+        }
     }
 
     /**
