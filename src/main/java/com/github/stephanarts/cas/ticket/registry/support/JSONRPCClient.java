@@ -213,6 +213,11 @@ public class JSONRPCClient {
      *                  should be used by watchdog thread.
      */
     public final void setAvailable(final boolean available) {
+        if (available == true) {
+            logger.warn("Server: '"+this.connectUri+"' - available");
+        } else {
+            logger.warn("Server: '"+this.connectUri+"' - not available");
+        }
         this.available = available;
     }
 
