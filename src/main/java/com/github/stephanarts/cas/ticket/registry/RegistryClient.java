@@ -37,6 +37,7 @@ import org.jasig.cas.ticket.Ticket;
 
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCClient;
+import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 
 /**
  * RegistryClient Class.
@@ -55,6 +56,17 @@ public class RegistryClient extends JSONRPCClient {
      */
     public RegistryClient(final String connectUri) {
         super(connectUri);
+        this.connect();
+    }
+
+    /**
+     * Create RegistryClient object.
+     *
+     * @param connectUri   URI to connect the client to.
+     * @param pacemaker    Pacemaker instance,
+     */
+    public RegistryClient(final String connectUri, final PaceMaker pacemaker) {
+        super(connectUri, pacemaker);
         this.connect();
     }
 
@@ -247,6 +259,4 @@ public class RegistryClient extends JSONRPCClient {
 
         return tickets;
     }
-
-
 }

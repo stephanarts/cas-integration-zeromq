@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 import org.jasig.cas.ticket.Ticket;
 
+import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 
 /**
@@ -55,7 +56,7 @@ public final class RegistryBroker {
      *
      * @param providers         Array of providers to connect to
      * @param requestTimeout    timeout for client requests.
-     * @param heartbeatInterval heartbeat interval for local provider.
+     * @param pacemaker         PaceMaker instance.
      * @param localProviderId   id that matches the 'local' provider
      *                          used for quick lookups.
      *
@@ -64,7 +65,7 @@ public final class RegistryBroker {
     public RegistryBroker(
                 final String[] providers,
                 final int requestTimeout,
-                final int heartbeatInterval,
+                final PaceMaker pacemaker,
                 final String localProviderId)
             throws Exception {
 
@@ -76,7 +77,7 @@ public final class RegistryBroker {
         this.providers = new RegistryClient[providers.length];
 
         for(int i = 0; i < this.providers.length; ++i) {
-            client = new RegistryClient(providers[i]);
+            client = new RegistryClient(providers[i], pacemaker);
             try {
                 id = client.getProviderId();
                 if (localProviderId.equals(id)) {

@@ -22,6 +22,7 @@ import org.jasig.cas.ticket.registry.AbstractDistributedTicketRegistry;
 import org.springframework.beans.factory.DisposableBean;
 
 import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
+import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 
 /**
  * Ticket registry implementation that stores tickets via JSON-RPC
@@ -76,7 +77,7 @@ private RegistryBroker   registryBroker;
         this.registryBroker = new RegistryBroker(
                 providers,
                 requestTimeout,
-                heartbeatInterval,
+                PaceMaker.getInstance(),
                 this.providerId);
 
         try {

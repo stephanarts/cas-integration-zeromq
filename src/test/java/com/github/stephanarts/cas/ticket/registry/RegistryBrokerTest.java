@@ -51,7 +51,7 @@ public class RegistryBrokerTest
         RegistryBroker broker = new RegistryBroker(
             addresses,
             1500,
-            200,
+            null,
             "testConstructor");
 
         provider.interrupt();
@@ -84,7 +84,7 @@ public class RegistryBrokerTest
         broker = new RegistryBroker(
             addresses,
             1500,
-            200,
+            null,
             "primary");
 
         try {
@@ -126,7 +126,7 @@ public class RegistryBrokerTest
         broker = new RegistryBroker(
             addresses,
             1500,
-            200,
+            null,
             "bootstrapFailure");
 
         try {
@@ -149,7 +149,7 @@ public class RegistryBrokerTest
             broker = new RegistryBroker(
                 addresses,
                 1500,
-                200,
+                null,
                 "missing");
         } catch (Exception e) {
             return;
