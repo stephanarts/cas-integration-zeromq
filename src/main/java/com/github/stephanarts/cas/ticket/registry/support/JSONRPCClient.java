@@ -199,6 +199,8 @@ public class JSONRPCClient {
 
     /**
      * Return if the server is available.
+     *
+     * @return availability of peer
      */
     public final boolean getAvailable() {
         return this.available;
@@ -206,6 +208,9 @@ public class JSONRPCClient {
 
     /**
      * Set if the server is available.
+     *
+     * @param available availability of peer,
+     *                  should be used by watchdog thread.
      */
     public final void setAvailable(final boolean available) {
         this.available = available;
