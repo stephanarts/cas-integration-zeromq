@@ -218,15 +218,6 @@ public final class RegistryBroker {
             logger.error(e.getMessage());
         }
 
-        for(int i = 0; i < this.providers.length; ++i) {
-            try {
-                ticket = this.providers[i].getTicket(ticketId);
-                return ticket;
-            } catch (final JSONRPCException e) {
-                logger.error(e.getMessage());
-            }
-        }
-
         return null;
     }
 
