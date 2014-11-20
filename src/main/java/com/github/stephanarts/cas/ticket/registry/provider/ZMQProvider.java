@@ -28,7 +28,8 @@ import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 /**
  * ZMQProvider Class.
  */
-public class ZMQProvider extends JSONRPCServer {
+public class ZMQProvider extends JSONRPCServer
+        implements ZMQProviderMBean {
 
     /**
      * Logging Class.
@@ -68,5 +69,9 @@ public class ZMQProvider extends JSONRPCServer {
         } catch(final JSONRPCException e) {
             logger.error(e.getMessage());
         }
+    }
+
+    public final int getSize() {
+        return ticketMap.size();
     }
 }
