@@ -1,5 +1,10 @@
+## 0.0.4-SNAPSHOT
 
-## 0.0.3-SNAPSHOT
+Changes:
+
+  - Implement MBean for monitoring
+
+## 0.0.3 (2014-10-08)
 
 Changes:
 
