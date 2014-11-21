@@ -24,8 +24,9 @@ import org.springframework.beans.factory.DisposableBean;
 import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
 import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 
-import java.lang.management.*;
-import javax.management.*;
+import java.lang.management.ManagementFactory;
+import javax.management.ObjectName;
+import javax.management.MBeanServer;
 
 /**
  * Ticket registry implementation that stores tickets via JSON-RPC
