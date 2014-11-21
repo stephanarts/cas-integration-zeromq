@@ -33,7 +33,8 @@ For a full list of changes in each release, view the [ChangeLog](CHANGELOG.md).
                         <value>tcp://192.168.0.2:5555</value>
                     </list>
                 </constructor-arg>
-                <constructor-arg name="bindUri"           value="tcp://*:5555" />
+                <constructor-arg name="address"           value="*" />
+                <constructor-arg name="port"              value="5555" />
                 <constructor-arg name="requestTimeout"    value="1500" />
                 <constructor-arg name="heartbeatTimeout"  value="500" />
                 <constructor-arg name="heartbeatInterval" value="5000" />
