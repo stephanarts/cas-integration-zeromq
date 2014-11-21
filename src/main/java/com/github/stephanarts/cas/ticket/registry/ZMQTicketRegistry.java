@@ -24,6 +24,9 @@ import org.springframework.beans.factory.DisposableBean;
 import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
 import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 
+import java.lang.management.*;
+import javax.management.*;
+
 /**
  * Ticket registry implementation that stores tickets via JSON-RPC
  * over a ZeroMQ transport layer.
@@ -79,6 +82,10 @@ private RegistryBroker   registryBroker;
                 requestTimeout,
                 PaceMaker.getInstance(),
                 this.providerId);
+
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("CAS:type=ZMQProvider");
+        mbs.registerMBean(this.provider, name);
 
         try {
             this.registryBroker.bootstrap();
