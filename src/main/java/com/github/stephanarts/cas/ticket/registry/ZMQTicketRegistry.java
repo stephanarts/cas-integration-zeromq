@@ -24,6 +24,8 @@ import org.springframework.beans.factory.DisposableBean;
 import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
 import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 
+import com.github.stephanarts.cas.jmx.TicketRegistry;
+
 import java.lang.management.ManagementFactory;
 import javax.management.ObjectName;
 import javax.management.MBeanServer;
@@ -47,8 +49,7 @@ public final class ZMQTicketRegistry
 
     private final ZMQProvider provider;
 
-
-private RegistryBroker   registryBroker;
+    private RegistryBroker   registryBroker;
 
     /**
      * Creates a new TicketRegistry Backend.
@@ -66,14 +67,15 @@ private RegistryBroker   registryBroker;
      */
     public ZMQTicketRegistry(
                 final String[] providers,
-                final String bindUri,
+                final String address,
+                final int port,
                 final int requestTimeout,
                 final int heartbeatTimeout,
                 final int heartbeatInterval)
             throws Exception {
 
         this.provider = new ZMQProvider(
-                bindUri,
+                "tcp://"+address+":"+port,
                 this.providerId);
 
         this.provider.start();
@@ -85,8 +87,9 @@ private RegistryBroker   registryBroker;
                 this.providerId);
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("CAS:type=ZMQProvider,id="+this.providerId);
-        mbs.registerMBean(this.provider, name);
+        ObjectName name = new ObjectName("CAS:type=TicketRegistry,port='"+port+"'");
+        TicketRegistry mbean = new TicketRegistry(this);
+        mbs.registerMBean(mbean, name);
 
         try {
             this.registryBroker.bootstrap();
@@ -163,5 +166,12 @@ private RegistryBroker   registryBroker;
     @Override
     protected boolean needsCallback() {
         return true;
+    }
+
+    /**
+     * Get local Provider ID.
+     */
+    public String getProviderId() {
+        return this.providerId;
     }
 }
