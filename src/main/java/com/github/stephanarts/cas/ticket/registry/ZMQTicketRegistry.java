@@ -85,7 +85,7 @@ private RegistryBroker   registryBroker;
                 this.providerId);
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("CAS:type=ZMQProvider");
+        ObjectName name = new ObjectName("CAS:type=ZMQProvider,id="+this.providerId);
         mbs.registerMBean(this.provider, name);
 
         try {
