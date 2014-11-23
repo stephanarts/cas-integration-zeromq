@@ -58,7 +58,8 @@ public final class ZMQTicketRegistry
      * CAS Tickets in a cluster of Registry-Providers.
      *
      * @param providers         Array of providers to connect to
-     * @param bindUri           URI to bind the RegistryProvider on
+     * @param address           Address to bind the RegistryProvider on
+     * @param port              TCP port to bind the RegistryProvider on
      * @param requestTimeout    Timeout
      * @param heartbeatTimeout  Timeout
      * @param heartbeatInterval Interval
