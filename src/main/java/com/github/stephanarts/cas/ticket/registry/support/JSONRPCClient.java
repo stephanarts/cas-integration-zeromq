@@ -141,7 +141,9 @@ public class JSONRPCClient {
      * @throws JSONRPCException Throws JSONRPCException if an error occurs
      *                          these can be related to JSONRPC, or the application.
      */
-    public final JSONObject call(final String method, final JSONObject params)
+    public final JSONObject call(
+            final String method,
+            final JSONObject params)
             throws JSONRPCException {
 
         JSONObject request = new JSONObject();
@@ -157,39 +159,41 @@ public class JSONRPCClient {
 
         logger.trace("Sending data...");
 
-        this.socket.send(request.toString(), 0);
+        synchronized(this.socket) {
+            this.socket.send(request.toString(), 0);
 
-        PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
+            PollItem[] items = {new PollItem(this.socket, Poller.POLLIN)};
 
-        logger.trace("Waiting for response data...");
-        int rc = ZMQ.poll(items, this.requestTimeout);
-        if(rc == -1) {
-            throw new JSONRPCException(-32603, "Internal error");
-        }
-
-        if(items[0].isReadable()) {
-            // We got a reply from the server, must match sequence
-            ZMsg message = ZMsg.recvMsg(socket);
-
-            try {
-                response = new JSONObject(new String(message.getLast().getData()));
-            } catch(final JSONException e) {
-                throw new JSONRPCException(-32700, "Parse error");
+            logger.trace("Waiting for response data...");
+            int rc = ZMQ.poll(items, this.requestTimeout);
+            if(rc == -1) {
+                throw new JSONRPCException(-32603, "Internal error");
             }
-            if (response.has("result")) {
-                result = response.getJSONObject("result");
-                return result;
-            }
-            if (response.has("error")) {
-                error = response.getJSONObject("error");
-                throw new JSONRPCException(error.getInt("code"), error.getString("message"));
-            }
-            throw new JSONRPCException(-32603, "Internal error");
-        } else {
-            logger.debug("Failed to get reply from {}", this.connectUri);
 
-            cleanup();
-            connect();
+            if(items[0].isReadable()) {
+                // We got a reply from the server, must match sequence
+                ZMsg message = ZMsg.recvMsg(socket);
+
+                try {
+                    response = new JSONObject(new String(message.getLast().getData()));
+                } catch(final JSONException e) {
+                    throw new JSONRPCException(-32700, "Parse error");
+                }
+                if (response.has("result")) {
+                    result = response.getJSONObject("result");
+                    return result;
+                }
+                if (response.has("error")) {
+                    error = response.getJSONObject("error");
+                    throw new JSONRPCException(error.getInt("code"), error.getString("message"));
+                }
+                throw new JSONRPCException(-32603, "Internal error");
+            } else {
+                logger.debug("Failed to get reply from {}", this.connectUri);
+
+                cleanup();
+                connect();
+            }
         }
 
         throw new JSONRPCException(-32300, "Request Timeout");
