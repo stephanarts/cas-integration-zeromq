@@ -65,7 +65,9 @@ public class RegistryClient extends JSONRPCClient {
      * @param connectUri   URI to connect the client to.
      * @param pacemaker    Pacemaker instance,
      */
-    public RegistryClient(final String connectUri, final PaceMaker pacemaker) {
+    public RegistryClient(
+            final String connectUri,
+            final PaceMaker pacemaker) {
         super(connectUri, pacemaker);
         this.connect();
     }

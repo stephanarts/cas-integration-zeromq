@@ -41,12 +41,16 @@ import org.zeromq.ZFrame;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCClient;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 
+
 /**
  * Unit test for JSONRPCClient.
  */
 @RunWith(JUnit4.class)
 public class JSONRPCClientTest
 {
+
+    //static String connectURI = new String("inproc://jsonrpcclient-test");
+    static String connectURI = new String("tcp://localhost:2222");
 
     /**
      * Logging Class.
@@ -61,26 +65,21 @@ public class JSONRPCClientTest
          */
         protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-
         Context context;
-        Socket  validResponseSocket;
-        Socket  invalidResponseSocket;
-        Socket  errorResponseSocket;
-        Socket  noResponseSocket;
+        Socket  socket;
 
         public final void run() {
 
             ZMsg   message;
             ZFrame body;
             String msg;
+            String methodName;
+            JSONObject req;
 
             logger.debug("RUN");
-            Poller items = new Poller(3);
+            Poller items = new Poller(1);
 
-            items.register(this.validResponseSocket, Poller.POLLIN);
-            items.register(this.invalidResponseSocket, Poller.POLLIN);
-            items.register(this.errorResponseSocket, Poller.POLLIN);
-            items.register(this.noResponseSocket, Poller.POLLIN);
+            items.register(this.socket, Poller.POLLIN);
 
             logger.debug("poll");
             while(!Thread.currentThread().isInterrupted()) {
@@ -88,26 +87,30 @@ public class JSONRPCClientTest
                 logger.trace("poll-res");
 
                 if(items.pollin(0)) {
-                    message = ZMsg.recvMsg(this.validResponseSocket);
+                    message = ZMsg.recvMsg(this.socket);
+                    body = message.getLast();
+
+                    msg = new String(body.getData());
+
+                    req = new JSONObject(msg);
+
+                    methodName = req.getString("method");
                     message.removeLast();
-                    message.addString("{\"json-rpc\": \"2.0\", \"result\": { \"OK\":\"...\"}}");
-                    message.send(this.validResponseSocket);
-                }
-                if(items.pollin(1)) {
-                    message = ZMsg.recvMsg(this.invalidResponseSocket);
-                    message.removeLast();
-                    message.addString("{\"json-rpc\": \"2.0\", \"status\"... \"OK\"}");
-                    message.send(this.invalidResponseSocket);
-                }
-                if(items.pollin(2)) {
-                    message = ZMsg.recvMsg(this.errorResponseSocket);
-                    message.removeLast();
-                    message.addString("{\"json-rpc\": \"2.0\", \"error\": {\"code\": -32501, \"message\": \"Test\"}}");
-                    message.send(this.errorResponseSocket);
-                }
-                if(items.pollin(3)) {
-                    message = ZMsg.recvMsg(this.noResponseSocket);
-                    message.removeLast();
+                    if (methodName.equals("valid")) {
+                        message.addString("{\"json-rpc\": \"2.0\", \"result\": { \"OK\":\"...\"}}");
+                        message.send(this.socket);
+                    }
+                    if (methodName.equals("invalid")) {
+                        message.addString("{\"json-rpc\": \"2.0\", \"status\"... \"OK\"}");
+                        message.send(this.socket);
+                    }
+                    if (methodName.equals("error")) {
+                        message.addString("{\"json-rpc\": \"2.0\", \"error\": {\"code\": -32501, \"message\": \"Test\"}}");
+                        message.send(this.socket);
+                    }
+                    if (methodName.equals("timeout")) {
+                    }
+                    logger.error("METHOD: "+methodName);
                 }
             }
 
@@ -115,15 +118,9 @@ public class JSONRPCClientTest
 
         public final void start() {
             this.context = ZMQ.context(1);
-            this.validResponseSocket = context.socket(ZMQ.ROUTER);
-            this.invalidResponseSocket = context.socket(ZMQ.ROUTER);
-            this.errorResponseSocket = context.socket(ZMQ.ROUTER);
-            this.noResponseSocket = context.socket(ZMQ.ROUTER);
+            this.socket = context.socket(ZMQ.ROUTER);
 
-            this.validResponseSocket.bind("tcp://localhost:2222");
-            this.invalidResponseSocket.bind("tcp://localhost:2223");
-            this.errorResponseSocket.bind("tcp://localhost:2224");
-            this.noResponseSocket.bind("tcp://localhost:2225");
+            this.socket.bind(JSONRPCClientTest.connectURI);
 
             logger.debug("START");
             super.start();
@@ -154,20 +151,12 @@ public class JSONRPCClientTest
     public void testValidResponse() throws Exception {
         logger.info("testValidResponse");
 
-        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2222");
+        JSONRPCClient c = new JSONRPCClient(JSONRPCClientTest.connectURI);
         JSONObject params = new JSONObject();
 
         c.connect();
 
-        c.call("t", params);
-
-        try {
-            Thread.sleep(30000);
-        } catch(InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-
-        c.call("t", params);
+        c.call("valid", params);
 
         c.disconnect();
     }
@@ -183,14 +172,14 @@ public class JSONRPCClientTest
     public void testInvalidResponse() throws Exception {
         logger.info("testInvalidResponse");
 
-        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2223");
+        JSONRPCClient c = new JSONRPCClient(JSONRPCClientTest.connectURI);
         JSONObject params = new JSONObject();
         JSONObject result = null;
 
         c.connect();
 
         try {
-            result = c.call("t", params);
+            result = c.call("invalid", params);
             Assert.assertNotNull(result);
         } catch (final JSONRPCException e) {
             Assert.assertEquals(-32700, e.getCode());
@@ -210,14 +199,14 @@ public class JSONRPCClientTest
     @Test
     public void testErrorResponse() throws Exception {
         logger.info("testErrorResponse");
-        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2224");
+        JSONRPCClient c = new JSONRPCClient(JSONRPCClientTest.connectURI);
         JSONObject params = new JSONObject();
         JSONObject result = null;
 
         c.connect();
 
         try {
-            result = c.call("t", params);
+            result = c.call("error", params);
             Assert.assertNotNull(result);
             
         } catch (final JSONRPCException e) {
@@ -244,7 +233,7 @@ public class JSONRPCClientTest
     @Test
     public void testTimeout() throws Exception {
         logger.info("testTimeout");
-        JSONRPCClient c = new JSONRPCClient("tcp://localhost:2225");
+        JSONRPCClient c = new JSONRPCClient(JSONRPCClientTest.connectURI);
         JSONObject params = new JSONObject();
         JSONObject result = null;
         int a = 0;
@@ -252,7 +241,7 @@ public class JSONRPCClientTest
         c.connect();
 
         try {
-            result = c.call("t", params);
+            result = c.call("timeout", params);
             Assert.assertNotNull(result);
         } catch (final JSONRPCException e) {
             Assert.assertEquals(-32300, e.getCode());
