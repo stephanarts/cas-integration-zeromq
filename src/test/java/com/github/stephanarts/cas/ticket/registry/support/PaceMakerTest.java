@@ -80,6 +80,12 @@ public class PaceMakerTest
 
         PaceMaker p = PaceMaker.getInstance();
         p.addClient(c);
+
+        Assert.assertEquals(1, p.getClientCount());
+
+        p.removeClient(c);
+
+        Assert.assertEquals(0, p.getClientCount());
     }
 
 }

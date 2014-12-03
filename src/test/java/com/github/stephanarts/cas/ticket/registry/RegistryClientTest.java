@@ -61,10 +61,12 @@ public class RegistryClientTest
             client.addTicket(ticket);
         } catch (final JSONRPCException e) {
             provider.interrupt();
+            client.disconnect();
             Assert.fail("Adding ticket Failed");
         }
 
         provider.interrupt();
+        client.disconnect();
     }
 
     @Test
@@ -79,13 +81,16 @@ public class RegistryClientTest
             client.addTicket(null);
         } catch (final JSONRPCException e) {
             provider.interrupt();
+            client.disconnect();
             return;
         } catch (final Exception e) {
             provider.interrupt();
+            client.disconnect();
             Assert.fail("Wrong Exception thrown");
         }
 
         provider.interrupt();
+        client.disconnect();
         Assert.fail("No exception thrown");
     }
 
@@ -105,9 +110,11 @@ public class RegistryClientTest
             client.addTicket(ticket);
         } catch (final JSONRPCException e) {
             provider.interrupt();
+            client.disconnect();
             Assert.fail("Adding ticket Failed");
         } catch (final Exception e) {
             provider.interrupt();
+            client.disconnect();
             Assert.fail("Adding ticket Failed");
         }
 
@@ -115,9 +122,11 @@ public class RegistryClientTest
             client.updateTicket(ticket);
         } catch (final JSONRPCException e) {
             provider.interrupt();
+            client.disconnect();
             Assert.fail("Update ticket Failed");
         }
 
         provider.interrupt();
+        client.disconnect();
     }
 }

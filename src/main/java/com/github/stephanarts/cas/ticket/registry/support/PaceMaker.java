@@ -1,5 +1,5 @@
 /*
- * This program is free software: you can redistribute it and/or modifyZZZZZZZZZ
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -141,5 +141,9 @@ public final class PaceMaker {
             this.workers[i].setClients(aClients);
         }
  
+    }
+
+    public int getClientCount() {
+        return this.clients.size();
     }
 }

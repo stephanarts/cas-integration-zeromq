@@ -303,4 +303,22 @@ public class JSONRPCClientTest
         Assert.assertFalse(available);
     }
 
+    @Test
+    public void testPaceMaker() throws Exception {
+        String uri = new String("tcp://localhost:1010");
+        PaceMaker p = PaceMaker.getInstance();
+        JSONRPCClient c = new JSONRPCClient(uri, p);
+
+        Assert.assertEquals(p.getClientCount(), 0);
+
+        c.connect();
+
+        Assert.assertEquals(p.getClientCount(), 1);
+
+        c.disconnect();
+
+        Assert.assertEquals(p.getClientCount(), 0);
+
+    }
+
 }
