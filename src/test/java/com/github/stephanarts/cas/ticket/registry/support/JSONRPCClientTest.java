@@ -38,6 +38,7 @@ import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMsg;
 import org.zeromq.ZFrame;
 
+import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCClient;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 
@@ -306,7 +307,7 @@ public class JSONRPCClientTest
     @Test
     public void testPaceMaker() throws Exception {
         String uri = new String("tcp://localhost:1010");
-        PaceMaker p = PaceMaker.getInstance();
+        PaceMaker p = new PaceMaker();
         JSONRPCClient c = new JSONRPCClient(uri, p);
 
         Assert.assertEquals(p.getClientCount(), 0);

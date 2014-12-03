@@ -32,8 +32,6 @@ public final class PaceMaker {
      */
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static PaceMaker INSTANCE = null;
-
     private int nWorkers = 1;
 
     private LinkedList<JSONRPCClient> clients = new LinkedList<JSONRPCClient>();
@@ -42,32 +40,13 @@ public final class PaceMaker {
 
 
     /**
-     * Pacemaker constructor
-     *
-     * This constructor is private, PaceMaker is a singleton and must
-     * be instantiated using the getInstance() method.
+     * Pacemaker constructor.
      */
-    private PaceMaker() {
+    public PaceMaker() {
         this.workers = new WatchDog[1];
         this.workers[0] = new WatchDog();
 
         this.workers[0].start();
-    }
-
-    /**
-     * Get the PaceMaker instance.
-     *
-     * On first call it will create a new PaceMaker instance,
-     * every other call to getInstance will return the same instance.
-     *
-     * @return pacemaker instance
-     */
-    public static PaceMaker getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new PaceMaker();
-        }
-
-        return INSTANCE;
     }
 
     /**

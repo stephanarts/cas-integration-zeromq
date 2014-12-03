@@ -62,23 +62,11 @@ public class PaceMakerTest
     }
 
 
-    /**
-     * testSingleton
-     *
-     * Goal:
-     * Test if PaceMaker is a singleton class.
-     *
-     */
-    @Test
-    public void testSingleton() throws Exception {
-        Assert.assertEquals(PaceMaker.getInstance(), PaceMaker.getInstance());
-    }
-
     @Test
     public void testAddClient() throws Exception {
         JSONRPCClient c = new JSONRPCClient("tcp://localhost:1234");
 
-        PaceMaker p = PaceMaker.getInstance();
+        PaceMaker p = new PaceMaker();
         p.addClient(c);
 
         Assert.assertEquals(1, p.getClientCount());

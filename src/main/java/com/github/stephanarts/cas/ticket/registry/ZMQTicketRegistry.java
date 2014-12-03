@@ -84,7 +84,7 @@ public final class ZMQTicketRegistry
         this.registryBroker = new RegistryBroker(
                 providers,
                 requestTimeout,
-                PaceMaker.getInstance(),
+                new PaceMaker(),
                 this.providerId);
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
