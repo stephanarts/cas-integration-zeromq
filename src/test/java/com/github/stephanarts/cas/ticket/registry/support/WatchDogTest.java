@@ -89,7 +89,9 @@ public class WatchDogTest
     public void testSleepInterrupt() throws Exception {
         WatchDog w = new WatchDog();
 
-        PowerMockito.mockStatic(Thread.class);
+        //PowerMockito.mockStatic(Thread.class);
+        //PowerMockito.doThrow(new InterruptedException()).when(Thread.class);
+        PowerMockito.spy(Thread.class);
         PowerMockito.doThrow(new InterruptedException()).when(Thread.class);
 
         w.start();
