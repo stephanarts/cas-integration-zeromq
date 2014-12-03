@@ -173,6 +173,8 @@ public final class ZMQTicketRegistry
 
     /**
      * Get local Provider ID.
+     *
+     * @return providerId.
      */
     public String getProviderId() {
         return this.providerId;
