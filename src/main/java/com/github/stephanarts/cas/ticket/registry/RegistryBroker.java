@@ -218,7 +218,11 @@ public final class RegistryBroker {
             ticket = this.localProvider.getTicket(ticketId);
             return ticket;
         } catch (final JSONRPCException e) {
-            logger.error("getTicket error: " + e.getMessage());
+            if (e == -32503) {
+                logger.debug("Missing Ticket: " + ticketId);
+            } else {
+                logger.error("getTicket error: " + e.getMessage());
+            }
         }
 
         return null;

@@ -94,6 +94,8 @@ public final class ZMQTicketRegistry
 
         try {
             this.registryBroker.bootstrap();
+            int nTickets = this.registryBroker.getTickets().size();
+            logger.info("Bootstrapping complete, got "+nTickets+" tickets.");
         } catch (final BootstrapException e) {
             logger.warn(e.getMessage());
         }
