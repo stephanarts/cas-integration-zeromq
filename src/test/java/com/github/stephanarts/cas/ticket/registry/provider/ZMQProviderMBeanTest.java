@@ -105,31 +105,11 @@ public class ZMQProviderMBeanTest
 
     @Test
     public void testGetSize() throws Exception {
+        Assert.assertEquals(0, mbeanProxy.getSize());
+    }
 
-        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi://");
-        JMXConnectorServer sc = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
-        sc.start();
-        JMXConnector cc = null;
-
-        try {
-            JMXServiceURL addr = sc.getAddress();
-
-            cc = JMXConnectorFactory.connect(addr);
-
-            MBeanServerConnection mbsc = cc.getMBeanServerConnection();
-
-            ZMQProviderMBean mbeanProxy = JMX.newMBeanProxy(
-                    mbsc,
-                    ZMQProviderMBeanTest.mbeanName,
-                    ZMQProviderMBean.class, true);
-
-            Assert.assertEquals(0, mbeanProxy.getSize());
-        } finally {
-
-            if (cc != null) {
-                cc.close();
-            }
-            sc.stop();
-        }
+    @Test
+    public void testGetId() throws Exception {
+        Assert.assertEquals("A", mbeanProxy.getProviderId());
     }
 }
