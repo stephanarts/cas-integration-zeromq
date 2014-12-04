@@ -64,14 +64,28 @@ public class PaceMakerTest
 
     @Test
     public void testAddClient() throws Exception {
-        JSONRPCClient c = new JSONRPCClient("tcp://localhost:1234");
+        JSONRPCClient c1 = new JSONRPCClient("tcp://localhost:1234");
+        JSONRPCClient c2 = new JSONRPCClient("tcp://localhost:1234");
 
         PaceMaker p = new PaceMaker();
-        p.addClient(c);
+        p.addClient(c1);
 
         Assert.assertEquals(1, p.getClientCount());
 
-        p.removeClient(c);
+        p.removeClient(c1);
+
+        Assert.assertEquals(0, p.getClientCount());
+
+        p.addClient(c1);
+        p.addClient(c2);
+
+        Assert.assertEquals(2, p.getClientCount());
+
+        p.removeClient(c1);
+
+        Assert.assertEquals(1, p.getClientCount());
+
+        p.removeClient(c2);
 
         Assert.assertEquals(0, p.getClientCount());
     }

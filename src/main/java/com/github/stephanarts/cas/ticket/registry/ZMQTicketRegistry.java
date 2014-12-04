@@ -24,8 +24,6 @@ import org.springframework.beans.factory.DisposableBean;
 import com.github.stephanarts.cas.ticket.registry.provider.ZMQProvider;
 import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 
-import com.github.stephanarts.cas.jmx.TicketRegistry;
-
 import java.lang.management.ManagementFactory;
 import javax.management.ObjectName;
 import javax.management.MBeanServer;
@@ -88,9 +86,8 @@ public final class ZMQTicketRegistry
                 this.providerId);
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("CAS:type=TicketRegistry,port='"+port+"'");
-        TicketRegistry mbean = new TicketRegistry(this);
-        mbs.registerMBean(mbean, name);
+        ObjectName name = new ObjectName("CAS:type=TicketRegistry,provider='"+port+"'");
+        mbs.registerMBean(this.provider, name);
 
         try {
             this.registryBroker.bootstrap();

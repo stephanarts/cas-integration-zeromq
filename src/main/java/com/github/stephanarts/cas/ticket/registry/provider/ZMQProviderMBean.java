@@ -23,6 +23,15 @@ public interface ZMQProviderMBean {
 
     /**
      * Return ticketMap size.
+     *
+     * @return number of tickets stored.
      */
     int getSize();
+
+    /**
+     * Return providerId.
+     *
+     * @return local Provider-ID.
+     */
+    String getProviderId();
 }

@@ -15,6 +15,10 @@
 
 package com.github.stephanarts.cas.ticket.registry.provider;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.Ignore;
 import org.junit.Assert;
@@ -40,17 +44,73 @@ import javax.management.remote.JMXServiceURL;
 @RunWith(JUnit4.class)
 public class ZMQProviderMBeanTest
 {
+    private static MBeanServer mbs;
+    private static ObjectName  mbeanName;
+    private static ZMQProvider provider;
+
+    static JMXConnectorServer sc = null;
+    static JMXConnector cc = null;
+    static MBeanServerConnection mbsc = null;
+    static ZMQProviderMBean mbeanProxy = null;
+
+    @BeforeClass
+    public static void beforeTest() throws Exception {
+        ZMQProviderMBeanTest.mbs =
+            ManagementFactory.getPlatformMBeanServer();
+        try {
+            ZMQProviderMBeanTest.mbeanName = new ObjectName(
+                    "TEST:type=UnitTest,name=ZMQProviderMBeanTest");
+            ZMQProviderMBeanTest.provider = new ZMQProvider(
+                    "tcp://*:9898",
+                    "A");
+
+            ZMQProviderMBeanTest.mbs.registerMBean(
+                    ZMQProviderMBeanTest.provider,
+                    ZMQProviderMBeanTest.mbeanName);
+
+            ZMQProviderMBeanTest.provider.start();
+
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi://");
+            ZMQProviderMBeanTest.sc = 
+                JMXConnectorServerFactory.newJMXConnectorServer(
+                    url,
+                    null,
+                    ZMQProviderMBeanTest.mbs);
+            ZMQProviderMBeanTest.sc.start();
+
+            JMXServiceURL addr = ZMQProviderMBeanTest.sc.getAddress();
+
+            ZMQProviderMBeanTest.cc = 
+                    JMXConnectorFactory.connect(addr);
+
+            ZMQProviderMBeanTest.mbsc =
+                ZMQProviderMBeanTest.cc.getMBeanServerConnection();
+
+            ZMQProviderMBeanTest.mbeanProxy = JMX.newMBeanProxy(
+                    ZMQProviderMBeanTest.mbsc,
+                    ZMQProviderMBeanTest.mbeanName,
+                    ZMQProviderMBean.class, true);
+
+        } catch (NotCompliantMBeanException e) {
+        } catch (MBeanRegistrationException e) {
+        } catch (InstanceAlreadyExistsException e) {
+        } catch (MalformedObjectNameException e) {
+        }
+    }
+
+    @AfterClass
+    public static void afterTest() {
+        ZMQProviderMBeanTest.provider.interrupt();
+    }
+
     @Test
     public void testGetSize() throws Exception {
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("com.github.stephanarts.cas.ticket.registry.provider:type=ZMQProviderMBean");
-        ZMQProvider mbean = new ZMQProvider("tcp://*:9898", "A");
-        mbs.registerMBean(mbean, name);
 
         JMXServiceURL url = new JMXServiceURL("service:jmx:rmi://");
         JMXConnectorServer sc = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
         sc.start();
         JMXConnector cc = null;
+
         try {
             JMXServiceURL addr = sc.getAddress();
 
@@ -60,11 +120,12 @@ public class ZMQProviderMBeanTest
 
             ZMQProviderMBean mbeanProxy = JMX.newMBeanProxy(
                     mbsc,
-                    name,
+                    ZMQProviderMBeanTest.mbeanName,
                     ZMQProviderMBean.class, true);
 
             Assert.assertEquals(0, mbeanProxy.getSize());
         } finally {
+
             if (cc != null) {
                 cc.close();
             }

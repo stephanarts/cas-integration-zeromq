@@ -45,6 +45,11 @@ public class ZMQProvider extends JSONRPCServer
     private static int NR = 0;
 
     /**
+     * providerId.
+     */
+    private String providerId = null;
+
+    /**
      *  Create a ZMQProvider.
      *
      *  @param bindUri    BindURI
@@ -58,6 +63,7 @@ public class ZMQProvider extends JSONRPCServer
         NR++;
 
         this.setName("ZMQProvider-"+NR);
+        this.providerId = uniqueId;
 
         try {
             registerMethod("cas.addTicket", new AddMethod(this.ticketMap));
@@ -71,7 +77,21 @@ public class ZMQProvider extends JSONRPCServer
         }
     }
 
+    /**
+     * Returns the size of the ticketMap (eg. number of tickets)
+     *
+     * @return number of tickets.
+     */
     public final int getSize() {
         return ticketMap.size();
+    }
+
+    /**
+     * Returns the unique-ID registry-provider.
+     *
+     * @return providerId.
+     */
+    public final String getProviderId() {
+        return this.providerId;
     }
 }
