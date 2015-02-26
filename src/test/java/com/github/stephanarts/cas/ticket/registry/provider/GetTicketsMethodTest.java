@@ -17,6 +17,9 @@ package com.github.stephanarts.cas.ticket.registry.provider;
 
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.junit.Test;
 import org.junit.Ignore;
 import org.junit.Assert;
@@ -51,6 +54,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(GetTicketsMethod.class)
 public class GetTicketsMethodTest
 {
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Test
     public void testValidInput() throws Exception {
         final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
