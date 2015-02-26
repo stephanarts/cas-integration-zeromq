@@ -116,7 +116,7 @@ public class RegistryBrokerTest
         when(ticket1.getId()).thenReturn(ticketId1);
         when(ticket2.getId()).thenReturn(ticketId2);
 
-        String[] addresses = {"tcp://localhost:4442","tcp://localhost:4443"};
+        String[] addresses = {"tcp://localhost:4445","tcp://localhost:4446"};
 
         ZMQProvider provider0 = new ZMQProvider(addresses[0], "primary");
         ZMQProvider provider1 = new ZMQProvider(addresses[1], "secondary");
@@ -126,6 +126,8 @@ public class RegistryBrokerTest
 
         provider0.start();
         provider1.start();
+
+        Thread.sleep(10000);
 
         populator.addTicket(ticket1);
         populator.addTicket(ticket2);
