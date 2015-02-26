@@ -117,6 +117,7 @@ public final class RegistryBroker {
                         continue;
                     }
                 } else {
+                    logger.debug("Provider "+this.providers[i].getConnectURI()+" is not available");
                     continue;
                 }
 
