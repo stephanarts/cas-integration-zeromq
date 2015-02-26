@@ -57,7 +57,7 @@
     <dependency>
       <groupId>org.zeromq</groupId>
       <artifactId>jeromq</artifactId>
-      <version>0.3.5-SNPSHOT</version>
+      <version>0.3.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>

@@ -40,7 +40,7 @@ public class RegistryBrokerTest
 
     @Test
     public void testConstructor() throws Exception {
-        String[] addresses = {"tcp://localhost:4444"};
+        String[] addresses = {"tcp://localhost:4440"};
 
         ZMQProvider provider = new ZMQProvider(
                 addresses[0],
@@ -63,7 +63,7 @@ public class RegistryBrokerTest
         final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
         when(ticket.getId()).thenReturn(ticketId);
 
-        String[] addresses = {"tcp://localhost:4440","tcp://localhost:4441"};
+        String[] addresses = {"tcp://localhost:4441","tcp://localhost:4442"};
 
         ZMQProvider provider0 = new ZMQProvider(addresses[0], "primary");
         ZMQProvider provider1 = new ZMQProvider(addresses[1], "secondary");
@@ -116,7 +116,7 @@ public class RegistryBrokerTest
         when(ticket1.getId()).thenReturn(ticketId1);
         when(ticket2.getId()).thenReturn(ticketId2);
 
-        String[] addresses = {"tcp://localhost:4445","tcp://localhost:4446"};
+        String[] addresses = {"tcp://localhost:4443","tcp://localhost:4444"};
 
         ZMQProvider provider0 = new ZMQProvider(addresses[0], "primary");
         ZMQProvider provider1 = new ZMQProvider(addresses[1], "secondary");
@@ -167,7 +167,7 @@ public class RegistryBrokerTest
         final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
         when(ticket.getId()).thenReturn(ticketId);
 
-        String[] addresses = {"tcp://localhost:4440","tcp://localhost:4441"};
+        String[] addresses = {"tcp://localhost:4445","tcp://localhost:4446"};
 
         ZMQProvider provider = new ZMQProvider(
                 addresses[0],
@@ -201,7 +201,7 @@ public class RegistryBrokerTest
 
     @Test
     public void testMissingLocalProvider() throws Exception {
-        String[] addresses = {"tcp://localhost:4444"};
+        String[] addresses = {"tcp://localhost:4447"};
         RegistryBroker broker = null;
         try {
             broker = new RegistryBroker(
