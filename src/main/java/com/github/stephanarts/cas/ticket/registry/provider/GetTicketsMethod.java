@@ -67,8 +67,6 @@ final class GetTicketsMethod implements IMethod {
         JSONObject result = new JSONObject();
         JSONArray tickets = new JSONArray();
 
-        logger.debug("GET");
-
         String ticketId = null;
 
         if (params.length() != 0) {
@@ -92,6 +90,8 @@ final class GetTicketsMethod implements IMethod {
 
             tickets.put(DatatypeConverter.printBase64Binary(serializedTicketArray));
         }
+
+        logger.debug("GetTickets: "tickets.length());
 
         result.put("tickets", tickets);
 
