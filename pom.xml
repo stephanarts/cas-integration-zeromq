@@ -28,7 +28,7 @@
 <groupId>com.github.stephanarts</groupId>
 <artifactId>cas-server-integration-zeromq</artifactId>
 <packaging>jar</packaging>
-<version>0.0.4-SNAPSHOT</version>
+<version>0.0.4</version>
 <name>ZeroMQ Integration for Jasig CAS</name>
 
 <repositories>
@@ -57,7 +57,7 @@
     <dependency>
       <groupId>org.zeromq</groupId>
       <artifactId>jeromq</artifactId>
-      <version>0.3.5-SNAPSHOT</version>
+      <version>0.3.4</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
