@@ -242,6 +242,7 @@ public class RegistryClient extends JSONRPCClient {
         result = this.call("cas.getTickets", params);
 
         if (result.has("tickets")) {
+            logger.debug(result.toString());
             resultTickets = result.getJSONArray("tickets");
             for(int i = 0; i < result.length(); ++i) {
                 try {
