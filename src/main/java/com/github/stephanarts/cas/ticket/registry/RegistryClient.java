@@ -175,7 +175,8 @@ public class RegistryClient extends JSONRPCClient
             serializedTicket = result.getString("ticket");
 
             try {
-                ByteArrayInputStream bi = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(serializedTicket));
+                ByteArrayInputStream bi = new ByteArrayInputStream(
+                        DatatypeConverter.parseBase64Binary(serializedTicket));
                 ObjectInputStream si = new ObjectInputStream(bi);
 
                 ticket = (Ticket) si.readObject();
@@ -248,7 +249,8 @@ public class RegistryClient extends JSONRPCClient
             for(int i = 0; i < resultTickets.length(); ++i) {
                 try {
                     String serializedTicket = resultTickets.getString(i);
-                    ByteArrayInputStream bi = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(serializedTicket));
+                    ByteArrayInputStream bi = new ByteArrayInputStream(
+                            DatatypeConverter.parseBase64Binary(serializedTicket));
                     ObjectInputStream si = new ObjectInputStream(bi);
 
                     ticket = (Ticket) si.readObject();

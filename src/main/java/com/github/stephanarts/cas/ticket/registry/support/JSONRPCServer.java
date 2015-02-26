@@ -286,8 +286,6 @@ public class JSONRPCServer extends Thread {
             return null;
         }
 
-        logger.debug(response.toString());
-
         return response.toString();
     }
     
