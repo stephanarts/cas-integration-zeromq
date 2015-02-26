@@ -111,6 +111,7 @@ public class RegistryBrokerTest
         final ServiceTicket ticket2 = mock(ServiceTicket.class, withSettings().serializable());
 
         ServiceTicket ticketFromRegistry1 = null;
+        ServiceTicket ticketFromRegistry2 = null;
 
         when(ticket1.getId()).thenReturn(ticketId1);
         when(ticket2.getId()).thenReturn(ticketId2);
