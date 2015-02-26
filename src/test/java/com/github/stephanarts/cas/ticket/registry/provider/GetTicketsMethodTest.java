@@ -132,8 +132,8 @@ public class GetTicketsMethodTest
         final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
         final JSONObject params = new JSONObject();
         final IMethod method = new GetTicketsMethod(map);
-        final JSONObject result;
-        final JSONArray  tickets;
+        JSONObject result;
+        JSONArray  tickets;
 
         final String ticketId1 = "ST-1234567890ABCDEFGHIJKL-crud1";
         final ServiceTicket ticket1 = mock(ServiceTicket.class, withSettings().serializable());
@@ -143,7 +143,25 @@ public class GetTicketsMethodTest
         final ServiceTicket ticket2 = mock(ServiceTicket.class, withSettings().serializable());
         when(ticket2.getId()).thenReturn(ticketId2);
 
+        final String ticketId3 = "ST-1234567890ABCDEFGHIJKL-crud3";
+        final ServiceTicket ticket3 = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket3.getId()).thenReturn(ticketId3);
+
         map.put(ticketId1.hashCode(), ticket1);
+
+        try {
+            result = method.execute(params);
+            if (!result.has("tickets")) {
+                Assert.fail("key: tickets missing from result-set");
+            }
+            tickets = result.getJSONArray("tickets");
+            Assert.assertEquals(1, tickets.length());
+        } catch (final JSONRPCException e) {
+            Assert.fail(e.getMessage());
+        } catch (final Exception e) {
+            throw new Exception(e);
+        }
+
         map.put(ticketId2.hashCode(), ticket2);
 
         try {
@@ -153,6 +171,21 @@ public class GetTicketsMethodTest
             }
             tickets = result.getJSONArray("tickets");
             Assert.assertEquals(2, tickets.length());
+        } catch (final JSONRPCException e) {
+            Assert.fail(e.getMessage());
+        } catch (final Exception e) {
+            throw new Exception(e);
+        }
+
+        map.put(ticketId3.hashCode(), ticket3);
+
+        try {
+            result = method.execute(params);
+            if (!result.has("tickets")) {
+                Assert.fail("key: tickets missing from result-set");
+            }
+            tickets = result.getJSONArray("tickets");
+            Assert.assertEquals(3, tickets.length());
         } catch (final JSONRPCException e) {
             Assert.fail(e.getMessage());
         } catch (final Exception e) {
