@@ -156,8 +156,6 @@ public class GetTicketsMethodTest
 
             logger.debug(tickets.toString());
             logger.debug(result.toString());
-            logger.debug(tickets[0].toString());
-            logger.debug(tickets[1].toString());
         } catch (final JSONRPCException e) {
             Assert.fail(e.getMessage());
         } catch (final Exception e) {
