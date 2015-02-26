@@ -127,13 +127,8 @@ public class RegistryBrokerTest
         provider0.start();
         provider1.start();
 
-        Thread.sleep(10000);
-
         populator.addTicket(ticket1);
         populator.addTicket(ticket2);
-
-        Thread.sleep(10000);
-
 
         /*
          * If bootstrapping is successfull,
