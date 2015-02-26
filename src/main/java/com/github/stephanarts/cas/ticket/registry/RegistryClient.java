@@ -42,7 +42,8 @@ import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 /**
  * RegistryClient Class.
  */
-public class RegistryClient extends JSONRPCClient {
+public class RegistryClient extends JSONRPCClient
+        implements RegistryClientMBean {
 
     /**
      * Logging Class.
@@ -259,7 +260,15 @@ public class RegistryClient extends JSONRPCClient {
             }
         }
 
-
         return tickets;
+    }
+
+    /**
+     * MBean Interface for provider availability.
+     *
+     * @return true if the provider is available;
+     */
+    public final boolean getProviderAvailable() {
+        return this.getAvailable();
     }
 }
