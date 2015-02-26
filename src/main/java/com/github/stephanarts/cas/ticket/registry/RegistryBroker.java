@@ -127,7 +127,7 @@ public final class RegistryBroker {
                         this.localProvider.addTicket(ticket);
                     } catch (final JSONRPCException e) {
                         this.bootstrapped = false;
-                        throw new BootstrapException();
+                        throw new BootstrapException("ehm...");
                     }
                 }
                 /* Bootstrap success */
@@ -136,7 +136,7 @@ public final class RegistryBroker {
         }
 
         /* Tried all providers, no success... */
-        throw new BootstrapException();
+        throw new BootstrapException("Tried all providers, no success...");
     }
 
 
