@@ -51,7 +51,7 @@ public class RegistryClientTest
         final ServiceTicket ticket = mock(ServiceTicket.class, withSettings().serializable());
         when(ticket.getId()).thenReturn(ticketId);
 
-        String[] addresses = {"tcp://localhost:4440"};
+        String[] addresses = {"tcp://localhost:4450"};
         ZMQProvider provider = new ZMQProvider(addresses[0], "add");
         RegistryClient client = new RegistryClient(addresses[0]);
 
