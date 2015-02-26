@@ -114,6 +114,7 @@ public final class RegistryBroker {
                     try {
                         tickets = this.providers[i].getTickets();
                     } catch (final JSONRPCException e) {
+                        logger.error("Provider '"+this.providers[i].getConnectURI()+"': "+e.getMessage());
                         continue;
                     }
                 } else {
