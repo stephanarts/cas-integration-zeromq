@@ -243,8 +243,9 @@ public class RegistryClient extends JSONRPCClient {
 
         if (result.has("tickets")) {
             logger.debug(result.toString());
+            logger.debug("Number of Tickets: " + result.getJSONArray("tickets").length());
             resultTickets = result.getJSONArray("tickets");
-            for(int i = 0; i < result.length(); ++i) {
+            for(int i = 0; i < resultTickets.length(); ++i) {
                 try {
                     String serializedTicket = resultTickets.getString(i);
                     ByteArrayInputStream bi = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(serializedTicket));
