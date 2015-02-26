@@ -145,7 +145,7 @@ public class GetTicketsMethodTest
             if (!result.has("tickets")) {
                 Assert.fail("key: tickets missing from result-set");
             }
-            tickets = result.get("tickets");
+            tickets = result.getJSONArray("tickets");
             Assert.assertEquals(2, tickets.length());
         } catch (final JSONRPCException e) {
             Assert.fail(e.getMessage());
