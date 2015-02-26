@@ -26,6 +26,7 @@ import org.junit.runners.JUnit4;
 import java.io.ObjectOutputStream;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import org.jasig.cas.ticket.Ticket;
 import org.jasig.cas.ticket.ServiceTicket;
