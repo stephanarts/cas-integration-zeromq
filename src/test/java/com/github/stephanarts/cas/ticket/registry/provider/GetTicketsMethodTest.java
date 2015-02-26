@@ -119,4 +119,37 @@ public class GetTicketsMethodTest
 
         Assert.fail("No Exception Thrown");
     }
+
+    @Test
+    public void testGetMultipleTickets() throws Exception {
+        final HashMap<Integer, Ticket> map = new HashMap<Integer, Ticket>();
+        final JSONObject params = new JSONObject();
+        final IMethod method = new GetTicketsMethod(map);
+        final JSONObject result;
+        final JSONArray  tickets;
+
+        final String ticketId1 = "ST-1234567890ABCDEFGHIJKL-crud1";
+        final ServiceTicket ticket1 = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket1.getId()).thenReturn(ticketId1);
+
+        final String ticketId2 = "ST-1234567890ABCDEFGHIJKL-crud2";
+        final ServiceTicket ticket2 = mock(ServiceTicket.class, withSettings().serializable());
+        when(ticket2.getId()).thenReturn(ticketId2);
+
+        map.put(ticketId1.hashCode(), ticket1);
+        map.put(ticketId2.hashCode(), ticket2);
+
+        try {
+            result = method.execute(params);
+            if (!result.has("tickets")) {
+                Assert.fail("key: tickets missing from result-set");
+            }
+            tickets = result.get("tickets");
+            Assert.assertEquals(2, tickets.length());
+        } catch (final JSONRPCException e) {
+            Assert.fail(e.getMessage());
+        } catch (final Exception e) {
+            throw new Exception(e);
+        }
+    }
 }
