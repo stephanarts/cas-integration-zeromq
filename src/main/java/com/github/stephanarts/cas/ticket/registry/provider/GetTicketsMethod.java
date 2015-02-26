@@ -88,7 +88,7 @@ final class GetTicketsMethod implements IMethod {
                 throw new JSONRPCException(-32500, "Error extracting Ticket");
             }
 
-            tickets.put(JSONObject.quote(DatatypeConverter.printBase64Binary(serializedTicketArray)));
+            tickets.put(DatatypeConverter.printBase64Binary(serializedTicketArray));
         }
 
         logger.debug("GetTickets: "+tickets.length());
