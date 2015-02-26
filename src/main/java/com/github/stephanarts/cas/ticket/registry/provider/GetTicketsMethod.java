@@ -91,7 +91,7 @@ final class GetTicketsMethod implements IMethod {
             tickets.put(DatatypeConverter.printBase64Binary(serializedTicketArray));
         }
 
-        logger.debug("GetTickets: "tickets.length());
+        logger.debug("GetTickets: "+tickets.length());
 
         result.put("tickets", tickets);
 
