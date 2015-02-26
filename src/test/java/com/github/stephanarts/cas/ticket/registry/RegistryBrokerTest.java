@@ -146,6 +146,7 @@ public class RegistryBrokerTest
         } catch (final BootstrapException e) {
             provider0.interrupt();
             provider1.interrupt();
+            Assert.fail ("BootstrapException thrown: "+ e.getMessage());
         }
 
         ticketFromRegistry1 = (ServiceTicket) checker.getTicket(ticketId1);
