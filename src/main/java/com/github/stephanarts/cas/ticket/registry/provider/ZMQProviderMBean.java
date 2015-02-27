@@ -34,4 +34,13 @@ public interface ZMQProviderMBean {
      * @return local Provider-ID.
      */
     String getProviderId();
+
+    /**
+     * Return statistics.
+     *
+     * @param method Method used.
+     *
+     * @return number of calls.
+     */
+    int getStats(final String method);
 }

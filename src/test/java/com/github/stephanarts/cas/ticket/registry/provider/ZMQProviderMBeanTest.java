@@ -112,4 +112,39 @@ public class ZMQProviderMBeanTest
     public void testGetId() throws Exception {
         Assert.assertEquals("A", mbeanProxy.getProviderId());
     }
+
+    @Test
+    public void testGetMissingMethodStats() throws Exception {
+        Assert.assertEquals(-1, mbeanProxy.getStats("missing"));
+    }
+
+    @Test
+    public void testGetStatsAddTicketsMethod() throws Exception {
+        Assert.assertEquals(0, mbeanProxy.getStats("cas.addTicket"));
+    }
+
+    @Test
+    public void testGetStatsGetTicketMethod() throws Exception {
+        Assert.assertEquals(0, mbeanProxy.getStats("cas.getTicket"));
+    }
+
+    @Test
+    public void testGetStatsGetTicketsMethod() throws Exception {
+        Assert.assertEquals(0, mbeanProxy.getStats("cas.getTickets"));
+    }
+
+    @Test
+    public void testGetStatsDeleteTicketMethod() throws Exception {
+        Assert.assertEquals(0, mbeanProxy.getStats("cas.deleteTicket"));
+    }
+
+    @Test
+    public void testGetStatsUpdateTicketMethod() throws Exception {
+        Assert.assertEquals(0, mbeanProxy.getStats("cas.updateTicket"));
+    }
+
+    @Test
+    public void testGetStatsGetProviderIdMethod() throws Exception {
+        Assert.assertEquals(0, mbeanProxy.getStats("cas.getProviderId"));
+    }
 }

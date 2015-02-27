@@ -94,4 +94,15 @@ public class ZMQProvider extends JSONRPCServer
     public final String getProviderId() {
         return this.providerId;
     }
+
+    /**
+     * Return statistics.
+     *
+     * @param methodName Method used.
+     *
+     * @return number of calls.
+     */
+    public final int getStats(final String methodName) {
+        return this.getMethodStats(methodName);
+    }
 }

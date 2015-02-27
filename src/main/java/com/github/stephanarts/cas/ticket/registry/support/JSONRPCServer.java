@@ -67,6 +67,11 @@ public class JSONRPCServer extends Thread {
      */
     private final HashMap<String, IMethod> methodMap;
 
+    /**
+     * Hashmap of call-counters.
+     */
+    private final HashMap<String, Integer> methodCounterMap;
+
     private static int NR = 0;
 
     private static Object NRLOCK = new Object();
@@ -90,6 +95,8 @@ public class JSONRPCServer extends Thread {
         this.setName("JSONRPCServer");
 
         this.methodMap = new HashMap<String, IMethod>();
+        this.methodCounterMap = new HashMap<String, Integer>();
+
         synchronized(this.NRLOCK) {
             this.NR++;
             this.nr = this.NR;
@@ -116,6 +123,7 @@ public class JSONRPCServer extends Thread {
         }
 
         this.methodMap.put(name, method);
+        this.methodCounterMap.put(name, new Integer(0));
     }
 
     /**
@@ -210,6 +218,7 @@ public class JSONRPCServer extends Thread {
         String     methodId = null;
 
         IMethod    method;
+        Integer    methodCounter = 0;
 
         JSONObject params;
 
@@ -248,6 +257,9 @@ public class JSONRPCServer extends Thread {
             }
 
             params = request.getJSONObject("params");
+
+            //methodCounter = this.methodCounterMap.get(methodName);
+            //this.methodCounterMap.put(methodName, methodCounter+1);
 
             result = method.execute(params);
 
@@ -393,5 +405,25 @@ public class JSONRPCServer extends Thread {
 
         logger.debug("Starting JSONRPCServer ["+this.nr+"]");
         super.start();
+    }
+
+    /**
+     * Return counter for method.
+     *
+     * @param methodName
+     *
+     * @return counter (or -1 if method does not exist)
+     */
+    protected final int getMethodStats(final String methodName) {
+
+        Integer methodCounter;
+
+        if (!this.methodCounterMap.containsKey(methodName)) {
+            return -1;
+        }
+
+        methodCounter = this.methodCounterMap.get(methodName);
+
+        return methodCounter.intValue();
     }
 }
