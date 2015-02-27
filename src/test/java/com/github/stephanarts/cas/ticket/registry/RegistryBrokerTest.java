@@ -38,6 +38,9 @@ import static org.mockito.Mockito.withSettings;
 public class RegistryBrokerTest
 {
 
+    /**
+     * test if a registrybroker can be constructed.
+     */
     @Test
     public void testConstructor() throws Exception {
         String[] addresses = {"tcp://localhost:4440"};
@@ -57,6 +60,14 @@ public class RegistryBrokerTest
         provider.interrupt();
     }
 
+    /**
+     * Test if bootstrapping works with a single ticket.
+     *
+     * This was the original bootstrap unittest, it turned out not
+     * to cover the complete functionality.
+     *
+     * See: testBootstrapMultipleTicketsSuccess.
+     */
     @Test
     public void testBootstrapSingleTicketSuccess() throws Exception {
         final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
@@ -103,6 +114,12 @@ public class RegistryBrokerTest
         Assert.assertEquals(ticketId, ticketFromRegistry.getId());
     }
 
+    /**
+     * Test if bootstrapping works with multiple tickets.
+     *
+     * At some point, bootstrapping worked but erroneously returned
+     * just a single ticket.
+     */
     @Test
     public void testBootstrapMultipleTicketsSuccess() throws Exception {
         final String ticketId1 = "ST-1234567890ABCDEFGHIJKL-crud1";
@@ -161,6 +178,10 @@ public class RegistryBrokerTest
         Assert.assertEquals(ticketId2, ticketFromRegistry2.getId());
     }
 
+    /**
+     * Test if a BootstrapException is thrown when bootstrapping
+     * fails.
+     */
     @Test
     public void testBootstrapFailure() throws Exception {
         final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
@@ -199,6 +220,12 @@ public class RegistryBrokerTest
         Assert.fail ("BootstrapException not thrown");
     }
 
+    /**
+     * Test if an exception is thrown when the
+     * local TicketRegistry Provider can't be found.
+     *
+     * This indicates a critical configuration error.
+     */
     @Test
     public void testMissingLocalProvider() throws Exception {
         String[] addresses = {"tcp://localhost:4447"};

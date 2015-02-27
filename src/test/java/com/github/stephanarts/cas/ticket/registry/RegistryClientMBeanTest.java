@@ -99,6 +99,9 @@ public class RegistryClientMBeanTest
     public static void afterTest() {
     }
 
+    /**
+     * Test if the availability-flag can be read via the MBean.
+     */
     @Test
     public void testGetAvailable() throws Exception {
         RegistryClientMBeanTest.client.setAvailable(false);

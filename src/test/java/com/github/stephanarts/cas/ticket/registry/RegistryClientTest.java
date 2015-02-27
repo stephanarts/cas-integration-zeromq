@@ -39,12 +39,18 @@ import static org.mockito.Mockito.withSettings;
 public class RegistryClientTest
 {
 
+    /**
+     * Test if a RegistryClient can be constructed.
+     */
     @Test
     public void testConstructor() throws Exception {
         RegistryClient client = new RegistryClient("tcp://localhost:4454");
     }
 
    
+    /**
+     * Test if a ticket can be added through the transport-layer.
+     */
     @Test
     public void testAddTicket() throws Exception {
         final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
@@ -69,6 +75,9 @@ public class RegistryClientTest
         client.disconnect();
     }
 
+    /**
+     * Test if the proper exception is thrown when a NULL ticket is added.
+     */
     @Test
     public void testAddNullTicket() throws Exception {
         String[] addresses = {"tcp://localhost:4451"};
@@ -94,6 +103,9 @@ public class RegistryClientTest
         Assert.fail("No exception thrown");
     }
 
+    /**
+     * Test if a ticket can be updated through the transport-layer.
+     */
     @Test
     public void testUpdateTicket() throws Exception {
         final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
