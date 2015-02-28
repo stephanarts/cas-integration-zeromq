@@ -76,8 +76,8 @@ public class RegistryBrokerTest
 
         String[] addresses = {"tcp://localhost:4441","tcp://localhost:4442"};
 
-        ZMQProvider provider0 = new ZMQProvider(addresses[0], "primary");
-        ZMQProvider provider1 = new ZMQProvider(addresses[1], "secondary");
+        ZMQProvider provider0 = new ZMQProvider(addresses[0], "primary-1");
+        ZMQProvider provider1 = new ZMQProvider(addresses[1], "secondary-1");
         RegistryClient populator = new RegistryClient(addresses[1]);
         RegistryClient checker = new RegistryClient(addresses[0]);
         RegistryBroker broker = null;
@@ -96,7 +96,7 @@ public class RegistryBrokerTest
             addresses,
             1500,
             null,
-            "primary");
+            "primary-1");
 
         try {
             broker.bootstrap();
@@ -135,8 +135,8 @@ public class RegistryBrokerTest
 
         String[] addresses = {"tcp://localhost:4443","tcp://localhost:4444"};
 
-        ZMQProvider provider0 = new ZMQProvider(addresses[0], "primary");
-        ZMQProvider provider1 = new ZMQProvider(addresses[1], "secondary");
+        ZMQProvider provider0 = new ZMQProvider(addresses[0], "primary-2");
+        ZMQProvider provider1 = new ZMQProvider(addresses[1], "secondary-2");
         RegistryClient populator = new RegistryClient(addresses[1]);
         RegistryClient checker = new RegistryClient(addresses[0]);
         RegistryBroker broker = null;
@@ -155,7 +155,7 @@ public class RegistryBrokerTest
             addresses,
             1500,
             null,
-            "primary");
+            "primary-2");
 
         try {
             broker.bootstrap();

@@ -26,6 +26,10 @@ import org.jasig.cas.ticket.Ticket;
 import com.github.stephanarts.cas.ticket.registry.support.PaceMaker;
 import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 
+import java.lang.management.ManagementFactory;
+import javax.management.ObjectName;
+import javax.management.MBeanServer;
+
 /**
 * Ticket registry implementation that stores tickets via JSON-RPC
 * over a ZeroMQ transport layer.
@@ -76,8 +80,13 @@ public final class RegistryBroker {
 
         this.providers = new RegistryClient[providers.length];
 
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
         for(int i = 0; i < this.providers.length; ++i) {
             client = new RegistryClient(providers[i], pacemaker);
+
+            ObjectName name = new ObjectName("CAS:type=TicketRegistry,id='"+localProviderId+"',client='"+i+"'");
+            mbs.registerMBean(client, name);
             try {
                 id = client.getProviderId();
                 if (localProviderId.equals(id)) {
