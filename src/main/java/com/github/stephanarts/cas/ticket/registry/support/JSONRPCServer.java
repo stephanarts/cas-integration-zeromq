@@ -258,8 +258,8 @@ public class JSONRPCServer extends Thread {
 
             params = request.getJSONObject("params");
 
-            //methodCounter = this.methodCounterMap.get(methodName);
-            //this.methodCounterMap.put(methodName, methodCounter+1);
+            methodCounter = this.methodCounterMap.get(methodName);
+            this.methodCounterMap.put(methodName, methodCounter+1);
 
             result = method.execute(params);
 

@@ -25,6 +25,14 @@ import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import org.zeromq.ZMQ;
+import org.zeromq.ZMQ.Context;
+import org.zeromq.ZMQ.Socket;
+import org.zeromq.ZMQ.Poller;
+import org.zeromq.ZMQ.PollItem;
+import org.zeromq.ZMsg;
+import org.zeromq.ZFrame;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -106,6 +114,7 @@ public class ZMQProviderMBeanTest
     @Test
     public void testGetSize() throws Exception {
         Assert.assertEquals(0, mbeanProxy.getSize());
+
     }
 
     @Test
@@ -120,31 +129,192 @@ public class ZMQProviderMBeanTest
 
     @Test
     public void testGetStatsAddTicketsMethod() throws Exception {
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        socket.connect("tcp://localhost:9898");
+
         Assert.assertEquals(0, mbeanProxy.getStats("cas.addTicket"));
+
+        for (int i = 1; i < 10; ++i) {
+
+            socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"cas.addTicket\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+            PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, 5000);
+            if(rc == -1) {
+                throw new Exception("ZMQ.poll failed");
+            }
+
+            if(items[0].isReadable()) {
+                ZMsg message = ZMsg.recvMsg(socket);
+            } else {
+                throw new Exception("Failed to get reply from server");
+            }
+
+            Assert.assertEquals(i, mbeanProxy.getStats("cas.addTicket"));
+
+        }
+
+        socket.close();
+        context.close();
     }
 
     @Test
     public void testGetStatsGetTicketMethod() throws Exception {
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        socket.connect("tcp://localhost:9898");
+
         Assert.assertEquals(0, mbeanProxy.getStats("cas.getTicket"));
+
+        for (int i = 1; i < 10; ++i) {
+
+            socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"cas.getTicket\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+            PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, 5000);
+            if(rc == -1) {
+                throw new Exception("ZMQ.poll failed");
+            }
+
+            if(items[0].isReadable()) {
+                ZMsg message = ZMsg.recvMsg(socket);
+            } else {
+                throw new Exception("Failed to get reply from server");
+            }
+
+            Assert.assertEquals(i, mbeanProxy.getStats("cas.getTicket"));
+        }
+
+        socket.close();
+        context.close();
     }
 
     @Test
     public void testGetStatsGetTicketsMethod() throws Exception {
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        socket.connect("tcp://localhost:9898");
+
         Assert.assertEquals(0, mbeanProxy.getStats("cas.getTickets"));
+
+        for (int i = 1; i < 10; ++i) {
+
+            socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"cas.getTickets\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+            PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, 5000);
+            if(rc == -1) {
+                throw new Exception("ZMQ.poll failed");
+            }
+
+            if(items[0].isReadable()) {
+                ZMsg message = ZMsg.recvMsg(socket);
+            } else {
+                throw new Exception("Failed to get reply from server");
+            }
+
+            Assert.assertEquals(i, mbeanProxy.getStats("cas.getTickets"));
+
+        }
+
+        socket.close();
+        context.close();
     }
 
     @Test
     public void testGetStatsDeleteTicketMethod() throws Exception {
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        socket.connect("tcp://localhost:9898");
+
         Assert.assertEquals(0, mbeanProxy.getStats("cas.deleteTicket"));
+
+        for (int i = 1; i < 10; ++i) {
+
+            socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"cas.deleteTicket\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+            PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, 5000);
+            if(rc == -1) {
+                throw new Exception("ZMQ.poll failed");
+            }
+
+            if(items[0].isReadable()) {
+                ZMsg message = ZMsg.recvMsg(socket);
+            } else {
+                throw new Exception("Failed to get reply from server");
+            }
+
+            Assert.assertEquals(i, mbeanProxy.getStats("cas.deleteTicket"));
+
+        }
+
+        socket.close();
+        context.close();
     }
 
     @Test
     public void testGetStatsUpdateTicketMethod() throws Exception {
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        socket.connect("tcp://localhost:9898");
+
         Assert.assertEquals(0, mbeanProxy.getStats("cas.updateTicket"));
+
+        for (int i = 1; i < 10; ++i) {
+
+            socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"cas.updateTicket\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+            PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, 5000);
+            if(rc == -1) {
+                throw new Exception("ZMQ.poll failed");
+            }
+
+            if(items[0].isReadable()) {
+                ZMsg message = ZMsg.recvMsg(socket);
+            } else {
+                throw new Exception("Failed to get reply from server");
+            }
+
+            Assert.assertEquals(i, mbeanProxy.getStats("cas.updateTicket"));
+
+        }
+
+        socket.close();
+        context.close();
     }
 
     @Test
     public void testGetStatsGetProviderIdMethod() throws Exception {
+        Context context = ZMQ.context(1);
+        Socket socket = context.socket(ZMQ.REQ);
+
+        socket.connect("tcp://localhost:9898");
+
         Assert.assertEquals(0, mbeanProxy.getStats("cas.getProviderId"));
+
+        for (int i = 1; i < 10; ++i) {
+
+            socket.send("{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"cas.getProviderId\",\"params\":{\"a\":\"b\"}}", ZMQ.DONTWAIT);
+            PollItem[] items = {new PollItem(socket, Poller.POLLIN)};
+            int rc = ZMQ.poll(items, 5000);
+            if(rc == -1) {
+                throw new Exception("ZMQ.poll failed");
+            }
+
+            if(items[0].isReadable()) {
+                ZMsg message = ZMsg.recvMsg(socket);
+            } else {
+                throw new Exception("Failed to get reply from server");
+            }
+
+            Assert.assertEquals(i, mbeanProxy.getStats("cas.getProviderId"));
+
+        }
+
+        socket.close();
+        context.close();
     }
 }
