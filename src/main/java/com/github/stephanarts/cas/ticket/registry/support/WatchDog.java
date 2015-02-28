@@ -203,4 +203,40 @@ public class WatchDog extends Thread {
         logger.debug("Sent a STOP Message to inproc://watchdog-"+this.nr);
         //super.interrupt();
     }
+
+    /**
+     * Set the heartbeatTimeout value.
+     *
+     * @param timeout (ms)
+     */
+    public final void setHeartbeatTimeout(final int timeout) {
+        this.heartbeatTimeout = timeout;
+    }
+
+    /**
+     * Set the heartbeatInterval value.
+     *
+     * @param interval (ms)
+     */
+    public final void setHeartbeatInterval(final int interval) {
+        this.heartbeatInterval = interval;
+    }
+
+    /**
+     * Get the heartbeatTimeout.
+     *
+     * @return timeout (ms).
+     */
+    public final int getHeartbeatTimeout() {
+        return this.heartbeatTimeout;
+    }
+
+    /**
+     * Get the heartbeatInterval.
+     *
+     * @return interval (ms).
+     */
+    public final int getHeartbeatInterval() {
+        return this.heartbeatInterval;
+    }
 }

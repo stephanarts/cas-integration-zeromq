@@ -50,6 +50,28 @@ public final class PaceMaker {
     }
 
     /**
+     * Set heartbeatInterval.
+     *
+     * @param interval
+     */
+    public void setHeartbeatInterval(final int interval) {
+        for(int i = 0; i < this.workers.length; ++i) {
+            this.workers[i].setHeartbeatInterval(interval);
+        }
+    }
+
+    /**
+     * Set heartbeatTimeout.
+     *
+     * @param interval
+     */
+    public void setHeartbeatTimeout(final int timeout) {
+        for(int i = 0; i < this.workers.length; ++i) {
+            this.workers[i].setHeartbeatTimeout(timeout);
+        }
+    }
+
+    /**
      * setWorkers(nr).
      *
      * Set the number of pacemaker worker threads

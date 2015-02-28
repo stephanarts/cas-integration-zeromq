@@ -79,10 +79,15 @@ public final class ZMQTicketRegistry
 
         this.provider.start();
 
+        PaceMaker pacemaker = new PaceMaker();
+
+        pacemaker.setHeartbeatInterval(heartbeatInterval);
+        pacemaker.setHeartbeatTimeout(heartbeatTimeout);
+
         this.registryBroker = new RegistryBroker(
                 providers,
                 requestTimeout,
-                new PaceMaker(),
+                pacemaker,
                 this.providerId);
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();

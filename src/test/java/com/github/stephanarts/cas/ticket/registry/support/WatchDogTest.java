@@ -102,4 +102,40 @@ public class WatchDogTest
         Assert.assertFalse(w.isAlive());
     }
 
+    @Test
+    public void testDefaultHeartbeatInterval() throws Exception {
+        WatchDog w = new WatchDog();
+
+        Assert.assertEquals(5000, w.getHeartbeatInterval());
+    }
+
+    @Test
+    public void testDefaultHeartbeatTimeout() throws Exception {
+        WatchDog w = new WatchDog();
+
+        Assert.assertEquals(200, w.getHeartbeatTimeout());
+    }
+
+    @Test
+    public void testHeartbeatInterval() throws Exception {
+        WatchDog w = new WatchDog();
+
+        Assert.assertEquals(5000, w.getHeartbeatInterval());
+
+        w.setHeartbeatInterval(2000);
+
+        Assert.assertEquals(2000, w.getHeartbeatInterval());
+    }
+
+    @Test
+    public void testHeartbeatTimeout() throws Exception {
+        WatchDog w = new WatchDog();
+
+        Assert.assertEquals(200, w.getHeartbeatTimeout());
+
+        w.setHeartbeatTimeout(400);
+
+        Assert.assertEquals(400, w.getHeartbeatTimeout());
+    }
+
 }
