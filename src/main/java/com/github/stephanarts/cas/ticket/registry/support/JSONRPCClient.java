@@ -243,4 +243,13 @@ public class JSONRPCClient {
         this.available = available;
     }
 
+    /**
+     * destroy.
+     */
+    public void destroy() throws Exception {
+        this.disconnect();
+        this.socket = null;
+        this.context.close();
+    }
+
 }

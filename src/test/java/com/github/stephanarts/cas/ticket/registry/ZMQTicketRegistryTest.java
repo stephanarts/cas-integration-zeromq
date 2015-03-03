@@ -63,6 +63,8 @@ public class ZMQTicketRegistryTest
         registry.deleteTicket(ticketId);
         Assert.assertNull(registry.getTicket(ticketId));
 
+        registry.destroy();
+
         registry = null;
     }
 
@@ -84,6 +86,9 @@ public class ZMQTicketRegistryTest
         registry.addTicket(ticket);
 
         Collection<Ticket> tickets = registry.getTickets();
+
+        registry.destroy();
+
         Assert.assertNotNull(tickets);
         Assert.assertEquals(1, tickets.size());
 
@@ -106,6 +111,8 @@ public class ZMQTicketRegistryTest
                 1500,
                 500,
                 2000);
+
+        registry.destroy();
 
         Assert.assertTrue(registry.needsCallback());
     }

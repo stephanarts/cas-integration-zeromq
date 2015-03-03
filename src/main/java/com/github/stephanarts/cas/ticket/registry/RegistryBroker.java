@@ -257,4 +257,13 @@ public final class RegistryBroker {
 
         return tickets;
     }
+
+    /**
+     * cleanup.
+     */
+    public void cleanup() throws Exception {
+        for(int i = 0; i < this.providers.length; ++i) {
+            this.providers[i].destroy();
+        }
+    }
 }

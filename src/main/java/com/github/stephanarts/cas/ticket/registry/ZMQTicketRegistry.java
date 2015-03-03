@@ -150,7 +150,8 @@ public final class ZMQTicketRegistry
      */
     @Override
     public void destroy() throws Exception {
-        this.provider.interrupt();
+        this.provider.cleanup();
+        this.registryBroker.cleanup();
         return;
     }
 

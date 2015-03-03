@@ -426,4 +426,12 @@ public class JSONRPCServer extends Thread {
 
         return methodCounter.intValue();
     }
+
+    /**
+     * Cleanup.
+     */
+    public void cleanup() throws Exception {
+        this.interrupt();
+        this.join();
+    }
 }

@@ -57,7 +57,8 @@ public class RegistryBrokerTest
             null,
             "testConstructor");
 
-        provider.interrupt();
+        provider.cleanup();
+        broker.cleanup();
     }
 
     /**
@@ -101,17 +102,20 @@ public class RegistryBrokerTest
         try {
             broker.bootstrap();
         } catch (final BootstrapException e) {
-            provider0.interrupt();
-            provider1.interrupt();
+            provider0.cleanup();
+            provider1.cleanup();
+            throw e;
         }
 
         final ServiceTicket ticketFromRegistry = (ServiceTicket) checker.getTicket(ticketId);
 
-        provider0.interrupt();
-        provider1.interrupt();
+        provider0.cleanup();
+        provider1.cleanup();
+        broker.cleanup();
 
         Assert.assertNotNull(ticketFromRegistry);
         Assert.assertEquals(ticketId, ticketFromRegistry.getId());
+
     }
 
     /**
@@ -168,8 +172,9 @@ public class RegistryBrokerTest
         ticketFromRegistry1 = (ServiceTicket) checker.getTicket(ticketId1);
         ticketFromRegistry2 = (ServiceTicket) checker.getTicket(ticketId2);
 
-        provider0.interrupt();
-        provider1.interrupt();
+        provider0.cleanup();
+        provider1.cleanup();
+        broker.cleanup();
 
         Assert.assertNotNull(ticketFromRegistry1);
         Assert.assertEquals(ticketId1, ticketFromRegistry1.getId());
@@ -211,11 +216,13 @@ public class RegistryBrokerTest
         try {
             broker.bootstrap();
         } catch (final BootstrapException e) {
-            provider.interrupt();
+            provider.cleanup();
+            broker.cleanup();
             return;
         }
 
-        provider.interrupt();
+        provider.cleanup();
+        broker.cleanup();
 
         Assert.fail ("BootstrapException not thrown");
     }

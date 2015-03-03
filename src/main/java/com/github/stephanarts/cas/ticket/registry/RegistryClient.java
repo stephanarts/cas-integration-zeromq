@@ -273,4 +273,5 @@ public class RegistryClient extends JSONRPCClient
     public final boolean getProviderAvailable() {
         return this.getAvailable();
     }
+
 }
