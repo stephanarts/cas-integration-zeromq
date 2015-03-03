@@ -119,7 +119,7 @@ public class JSONRPCServerTest
 
         socket.close();
         context.close();
-        server.interrupt();
+        server.cleanup();
     }
 
     @Test
@@ -159,7 +159,7 @@ public class JSONRPCServerTest
 
         socket.close();
         context.close();
-        server.interrupt();
+        server.cleanup();
     }
 
     @Test
@@ -209,7 +209,7 @@ public class JSONRPCServerTest
 
         socket.close();
         context.close();
-        server.interrupt();
+        server.cleanup();
     }
 
     @Test
@@ -263,7 +263,7 @@ public class JSONRPCServerTest
 
         socket.close();
         context.close();
-        server.interrupt();
+        server.cleanup();
     }
 
     @Test
@@ -312,7 +312,7 @@ public class JSONRPCServerTest
 
         socket.close();
         context.close();
-        server.interrupt();
+        server.cleanup();
     }
 
     @Test
@@ -354,7 +354,7 @@ public class JSONRPCServerTest
 
         socket.close();
         context.close();
-        server.interrupt();
+        server.cleanup();
     }
 
     @Test
@@ -396,7 +396,7 @@ public class JSONRPCServerTest
 
         socket.close();
         context.close();
-        server.interrupt();
+        server.cleanup();
     }
 
     @Test
@@ -423,7 +423,7 @@ public class JSONRPCServerTest
 
             socket.close();
             context.close();
-            server.interrupt();
+            server.cleanup();
 
             Assert.assertEquals(1, d.length);
             Assert.assertEquals(0x0, d[0]);
@@ -432,7 +432,7 @@ public class JSONRPCServerTest
 
         socket.close();
         context.close();
-        server.interrupt();
+        server.cleanup();
 
         Assert.fail("No heartbeat received.");
     }
@@ -442,8 +442,7 @@ public class JSONRPCServerTest
         JSONRPCServer s = new JSONRPCServer("tcp://localhost:7900");
         s.start();
         Assert.assertTrue(s.isAlive());
-        s.interrupt();
-        s.join();
+        s.cleanup();
         Assert.assertFalse(s.isAlive());
     }
 }
