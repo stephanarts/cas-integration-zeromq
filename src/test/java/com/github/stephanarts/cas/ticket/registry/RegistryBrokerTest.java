@@ -104,6 +104,9 @@ public class RegistryBrokerTest
         } catch (final BootstrapException e) {
             provider0.cleanup();
             provider1.cleanup();
+            broker.cleanup();
+            checker.destroy();
+            populator.destroy();
             throw e;
         }
 
@@ -112,6 +115,8 @@ public class RegistryBrokerTest
         provider0.cleanup();
         provider1.cleanup();
         broker.cleanup();
+        checker.destroy();
+        populator.destroy();
 
         Assert.assertNotNull(ticketFromRegistry);
         Assert.assertEquals(ticketId, ticketFromRegistry.getId());
@@ -164,8 +169,11 @@ public class RegistryBrokerTest
         try {
             broker.bootstrap();
         } catch (final BootstrapException e) {
-            provider0.interrupt();
-            provider1.interrupt();
+            provider0.cleanup();
+            provider1.cleanup();
+            broker.cleanup();
+            checker.destroy();
+            populator.destroy();
             Assert.fail ("BootstrapException thrown: "+ e.getMessage());
         }
 
@@ -175,6 +183,8 @@ public class RegistryBrokerTest
         provider0.cleanup();
         provider1.cleanup();
         broker.cleanup();
+        checker.destroy();
+        populator.destroy();
 
         Assert.assertNotNull(ticketFromRegistry1);
         Assert.assertEquals(ticketId1, ticketFromRegistry1.getId());

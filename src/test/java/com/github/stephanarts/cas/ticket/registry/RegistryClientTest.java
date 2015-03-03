@@ -66,13 +66,13 @@ public class RegistryClientTest
         try {
             client.addTicket(ticket);
         } catch (final JSONRPCException e) {
-            provider.interrupt();
-            client.disconnect();
+            provider.cleanup();
+            client.destroy();
             Assert.fail("Adding ticket Failed");
         }
 
-        provider.interrupt();
-        client.disconnect();
+        provider.cleanup();
+        client.destroy();
     }
 
     /**
@@ -89,17 +89,17 @@ public class RegistryClientTest
         try {
             client.addTicket(null);
         } catch (final JSONRPCException e) {
-            provider.interrupt();
-            client.disconnect();
+            provider.cleanup();
+            client.destroy();
             return;
         } catch (final Exception e) {
-            provider.interrupt();
-            client.disconnect();
+            provider.cleanup();
+            client.destroy();
             Assert.fail("Wrong Exception thrown");
         }
 
-        provider.interrupt();
-        client.disconnect();
+        provider.cleanup();
+        client.destroy();
         Assert.fail("No exception thrown");
     }
 
@@ -121,24 +121,24 @@ public class RegistryClientTest
         try {
             client.addTicket(ticket);
         } catch (final JSONRPCException e) {
-            provider.interrupt();
-            client.disconnect();
+            provider.cleanup();
+            client.destroy();
             Assert.fail("Adding ticket Failed");
         } catch (final Exception e) {
-            provider.interrupt();
-            client.disconnect();
+            provider.cleanup();
+            client.destroy();
             Assert.fail("Adding ticket Failed");
         }
 
         try {
             client.updateTicket(ticket);
         } catch (final JSONRPCException e) {
-            provider.interrupt();
-            client.disconnect();
+            provider.cleanup();
+            client.destroy();
             Assert.fail("Update ticket Failed");
         }
 
-        provider.interrupt();
-        client.disconnect();
+        provider.cleanup();
+        client.destroy();
     }
 }

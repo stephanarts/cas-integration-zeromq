@@ -15,6 +15,9 @@
 
 package com.github.stephanarts.cas.ticket.registry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +32,7 @@ import org.jasig.cas.ticket.ServiceTicket;
 import com.github.stephanarts.cas.ticket.registry.ZMQTicketRegistry;
 
 import java.util.Collection;
+import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,6 +44,11 @@ import static org.mockito.Mockito.withSettings;
 @RunWith(JUnit4.class)
 public class ZMQTicketRegistryTest
 {
+    /**
+     * Logging Class.
+     */
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Test
     public void testWriteGetDelete() throws Exception {
         final String ticketId = "ST-1234567890ABCDEFGHIJKL-crud";
@@ -115,5 +124,52 @@ public class ZMQTicketRegistryTest
         registry.destroy();
 
         Assert.assertTrue(registry.needsCallback());
+    }
+
+    /**
+     * testGetProviderId.
+     *
+     * Test that getProviderId returns a string.
+     */
+    @Test
+    public void testGetProviderId() throws Exception {
+
+        String[] addresses = {"tcp://localhost:5558"};
+        ZMQTicketRegistry registry = new ZMQTicketRegistry(
+                addresses,
+                "localhost",
+                5558,
+                1500,
+                500,
+                2000);
+
+        Assert.assertNotNull(registry.getProviderId());
+
+    }
+
+    /**
+     * w00t.
+     */
+    @Test
+    public void testThreadCleanup() throws Exception {
+        String[] addresses = {"tcp://localhost:5559"};
+        ZMQTicketRegistry registry = new ZMQTicketRegistry(
+                addresses,
+                "localhost",
+                5559,
+                1500,
+                500,
+                2000);
+
+
+        registry.destroy();
+
+        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+        Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+
+        logger.error("Threads: "+threadArray.length);
+        for (int i = 0; i < threadArray.length; ++i) {
+            logger.error(threadArray[i].getName()+" _ "+threadArray[i].getState().toString());
+        }
     }
 }
