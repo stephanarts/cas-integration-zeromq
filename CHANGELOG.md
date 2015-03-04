@@ -1,4 +1,15 @@
-## 0.0.5-SNAPSHOT
+## 0.0.6-SNAPSHOT
+
+Changes:
+
+  - ...
+
+## 0.0.5 (2015-03-04)
+
+Changes:
+
+  - Properly close threads and ZMQ resources upon
+    destruction.
 
 ## 0.0.4 (2015-02-26)
 
