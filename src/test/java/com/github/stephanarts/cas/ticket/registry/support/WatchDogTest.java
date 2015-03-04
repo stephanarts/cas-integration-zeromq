@@ -80,8 +80,7 @@ public class WatchDogTest
         WatchDog w = new WatchDog();
         w.start();
         Assert.assertTrue(w.isAlive());
-        w.interrupt();
-        w.join();
+        w.cleanup();
         Assert.assertFalse(w.isAlive());
     }
 
@@ -97,7 +96,7 @@ public class WatchDogTest
         Thread.sleep(anyLong());
 
         w.start();
-        w.join();
+        w.cleanup();
 
         Assert.assertFalse(w.isAlive());
     }
@@ -105,37 +104,49 @@ public class WatchDogTest
     @Test
     public void testDefaultHeartbeatInterval() throws Exception {
         WatchDog w = new WatchDog();
+        w.start();
 
         Assert.assertEquals(5000, w.getHeartbeatInterval());
+
+        w.cleanup();
     }
 
     @Test
     public void testDefaultHeartbeatTimeout() throws Exception {
         WatchDog w = new WatchDog();
+        w.start();
 
         Assert.assertEquals(200, w.getHeartbeatTimeout());
+
+        w.cleanup();
     }
 
     @Test
     public void testHeartbeatInterval() throws Exception {
         WatchDog w = new WatchDog();
+        w.start();
 
         Assert.assertEquals(5000, w.getHeartbeatInterval());
 
         w.setHeartbeatInterval(2000);
 
         Assert.assertEquals(2000, w.getHeartbeatInterval());
+
+        w.cleanup();
     }
 
     @Test
     public void testHeartbeatTimeout() throws Exception {
         WatchDog w = new WatchDog();
+        w.start();
 
         Assert.assertEquals(200, w.getHeartbeatTimeout());
 
         w.setHeartbeatTimeout(400);
 
         Assert.assertEquals(400, w.getHeartbeatTimeout());
+
+        w.cleanup();
     }
 
 }

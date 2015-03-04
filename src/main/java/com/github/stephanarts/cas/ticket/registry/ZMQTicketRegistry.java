@@ -49,6 +49,8 @@ public final class ZMQTicketRegistry
 
     private RegistryBroker   registryBroker;
 
+    private PaceMaker pacemaker;
+
     /**
      * Creates a new TicketRegistry Backend.
      *
@@ -79,7 +81,7 @@ public final class ZMQTicketRegistry
 
         this.provider.start();
 
-        PaceMaker pacemaker = new PaceMaker();
+        this.pacemaker = new PaceMaker();
 
         pacemaker.setHeartbeatInterval(heartbeatInterval);
         pacemaker.setHeartbeatTimeout(heartbeatTimeout);
@@ -87,7 +89,7 @@ public final class ZMQTicketRegistry
         this.registryBroker = new RegistryBroker(
                 providers,
                 requestTimeout,
-                pacemaker,
+                this.pacemaker,
                 this.providerId);
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -152,6 +154,7 @@ public final class ZMQTicketRegistry
     public void destroy() throws Exception {
         this.provider.cleanup();
         this.registryBroker.cleanup();
+        this.pacemaker.destroy();
         return;
     }
 

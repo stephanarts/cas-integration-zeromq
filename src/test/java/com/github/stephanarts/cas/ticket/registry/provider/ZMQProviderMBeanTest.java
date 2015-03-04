@@ -108,7 +108,9 @@ public class ZMQProviderMBeanTest
 
     @AfterClass
     public static void afterTest() {
-        ZMQProviderMBeanTest.provider.interrupt();
+        try {
+            ZMQProviderMBeanTest.provider.cleanup();
+        } catch (Exception e) { }
     }
 
     @Test

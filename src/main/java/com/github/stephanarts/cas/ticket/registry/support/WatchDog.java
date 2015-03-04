@@ -239,4 +239,26 @@ public class WatchDog extends Thread {
     public final int getHeartbeatInterval() {
         return this.heartbeatInterval;
     }
+
+    /**
+     * cleanup the watchdog.
+     */
+    public final void cleanup() {
+        this.interrupt();
+        try {
+            this.join();
+        } catch (final InterruptedException e) {
+            for(int i = 0; i < this.sockets.length; ++i) {
+                this.sockets[i].setLinger(0);
+                this.sockets[i].close();
+            }
+            this.context.close();
+            return;
+        }
+        for(int i = 0; i < this.sockets.length; ++i) {
+            this.sockets[i].setLinger(0);
+            this.sockets[i].close();
+        }
+        this.context.close();
+    }
 }

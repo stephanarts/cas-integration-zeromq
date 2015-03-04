@@ -147,4 +147,10 @@ public final class PaceMaker {
     public int getClientCount() {
         return this.clients.size();
     }
+
+    public void destroy() {
+        for (int i =0; i < nWorkers; ++i) {
+            this.workers[i].cleanup();
+        }
+    }
 }

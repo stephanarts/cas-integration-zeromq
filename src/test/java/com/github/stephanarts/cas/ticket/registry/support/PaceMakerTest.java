@@ -88,6 +88,10 @@ public class PaceMakerTest
         p.removeClient(c2);
 
         Assert.assertEquals(0, p.getClientCount());
+
+        c1.destroy();
+        c2.destroy();
+        p.destroy();
     }
 
 }
