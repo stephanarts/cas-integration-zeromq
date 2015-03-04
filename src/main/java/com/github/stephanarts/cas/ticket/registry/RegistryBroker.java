@@ -261,7 +261,7 @@ public final class RegistryBroker {
     /**
      * cleanup.
      */
-    public void cleanup() throws Exception {
+    public void cleanup() {
         for(int i = 0; i < this.providers.length; ++i) {
             this.providers[i].destroy();
         }

@@ -52,7 +52,7 @@ public final class PaceMaker {
     /**
      * Set heartbeatInterval.
      *
-     * @param interval
+     * @param interval Interval value
      */
     public void setHeartbeatInterval(final int interval) {
         for(int i = 0; i < this.workers.length; ++i) {
@@ -63,7 +63,7 @@ public final class PaceMaker {
     /**
      * Set heartbeatTimeout.
      *
-     * @param interval
+     * @param timeout Timeout value
      */
     public void setHeartbeatTimeout(final int timeout) {
         for(int i = 0; i < this.workers.length; ++i) {
@@ -144,12 +144,20 @@ public final class PaceMaker {
  
     }
 
+    /**
+     * Get the number of clients.
+     *
+     * @return number of clients
+     */
     public int getClientCount() {
         return this.clients.size();
     }
 
+    /**
+     * Destroy the pacemaker and it's worker threads.
+     */
     public void destroy() {
-        for (int i =0; i < nWorkers; ++i) {
+        for (int i =0; i < this.workers.length; ++i) {
             this.workers[i].cleanup();
         }
     }

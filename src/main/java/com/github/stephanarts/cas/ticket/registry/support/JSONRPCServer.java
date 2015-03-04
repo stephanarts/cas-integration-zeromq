@@ -410,7 +410,7 @@ public class JSONRPCServer extends Thread {
     /**
      * Return counter for method.
      *
-     * @param methodName
+     * @param methodName method for which the statistics are kept.
      *
      * @return counter (or -1 if method does not exist)
      */
@@ -428,10 +428,15 @@ public class JSONRPCServer extends Thread {
     }
 
     /**
-     * Cleanup.
+     * Close.
      */
-    public void cleanup() throws Exception {
+    public final void cleanup() {
         this.interrupt();
-        this.join();
+        try {
+            this.join();
+        } catch (final InterruptedException e) {
+            // It's fine if join throws an InterruptedException
+            logger.debug(e.toString());
+        }
     }
 }

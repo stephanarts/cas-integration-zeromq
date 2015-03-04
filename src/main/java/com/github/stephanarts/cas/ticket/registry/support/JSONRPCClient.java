@@ -246,7 +246,7 @@ public class JSONRPCClient {
     /**
      * destroy.
      */
-    public void destroy() throws Exception {
+    public final void destroy() {
         this.disconnect();
         this.socket = null;
         this.context.close();
