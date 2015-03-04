@@ -159,7 +159,7 @@ public class JSONRPCClientTest
 
         c.call("valid", params);
 
-        c.disconnect();
+        c.destroy();
     }
 
     /**
@@ -183,6 +183,7 @@ public class JSONRPCClientTest
             result = c.call("invalid", params);
             Assert.assertNotNull(result);
         } catch (final JSONRPCException e) {
+            c.destroy();
             Assert.assertEquals(-32700, e.getCode());
             return;
         }
@@ -208,15 +209,14 @@ public class JSONRPCClientTest
 
         try {
             result = c.call("error", params);
+            c.destroy();
             Assert.assertNotNull(result);
             
         } catch (final JSONRPCException e) {
             Assert.assertEquals(e.getCode(), -32501);
-            c.disconnect();
+            c.destroy();
             return;
         }
-
-        c.disconnect();
 
         Assert.fail("No Exception Thrown");
     }
@@ -243,14 +243,13 @@ public class JSONRPCClientTest
 
         try {
             result = c.call("timeout", params);
+            c.destroy();
             Assert.assertNotNull(result);
         } catch (final JSONRPCException e) {
+            c.destroy();
             Assert.assertEquals(-32300, e.getCode());
-            c.disconnect();
             return;
         }
-
-        c.disconnect();
 
         Assert.fail("No Exception Thrown");
     }
@@ -265,10 +264,12 @@ public class JSONRPCClientTest
         JSONRPCClient c = new JSONRPCClient(uri);
 
         Assert.assertTrue("getConnectURI does not return the correct URI", uri.equals(c.getConnectURI()));
+
+        c.destroy();
     }
 
     /**
-     * Test if sejreturns the URI.
+     * Test if setAvailability works.
      */
     @Test
     public void testAvailability() throws Exception {
@@ -302,6 +303,8 @@ public class JSONRPCClientTest
          * Check if the value equals false.
          */
         Assert.assertFalse(available);
+
+        c.destroy();
     }
 
     @Test
@@ -316,7 +319,7 @@ public class JSONRPCClientTest
 
         Assert.assertEquals(p.getClientCount(), 1);
 
-        c.disconnect();
+        c.destroy();
 
         Assert.assertEquals(p.getClientCount(), 0);
 
