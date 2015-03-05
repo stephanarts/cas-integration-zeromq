@@ -51,6 +51,8 @@ public final class ZMQTicketRegistry
 
     private PaceMaker pacemaker;
 
+    private ObjectName mbeanName;
+
     /**
      * Creates a new TicketRegistry Backend.
      *
@@ -93,8 +95,8 @@ public final class ZMQTicketRegistry
                 this.providerId);
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("CAS:type=TicketRegistry,provider='"+port+"'");
-        mbs.registerMBean(this.provider, name);
+        this.mbeanName = new ObjectName("CAS:type=TicketRegistry,provider='"+port+"'");
+        mbs.registerMBean(this.provider, this.mbeanName);
 
         try {
             this.registryBroker.bootstrap();
@@ -155,6 +157,8 @@ public final class ZMQTicketRegistry
         this.provider.cleanup();
         this.registryBroker.cleanup();
         this.pacemaker.destroy();
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        mbs.unregisterMBean(this.mbeanName);
         return;
     }
 
