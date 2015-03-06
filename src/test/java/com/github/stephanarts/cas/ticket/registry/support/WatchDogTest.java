@@ -149,4 +149,29 @@ public class WatchDogTest
         w.cleanup();
     }
 
+    @Test
+    public void testFailedHeartbeat() throws Exception {
+        boolean available;
+
+        WatchDog w = new WatchDog();
+        JSONRPCClient[] c = { new JSONRPCClient("tcp://localhost:6666", null)};
+
+        w.setClients(c);
+        
+
+        w.setHeartbeatTimeout(100);
+        w.setHeartbeatInterval(100);
+
+        w.start();
+
+        Thread.sleep(1000);
+        available = c[0].getAvailable();
+        if (available == true) {
+            w.cleanup();
+            Assert.fail("Watchdog did not set availability to false");
+        }
+
+        w.cleanup();
+    }
+
 }

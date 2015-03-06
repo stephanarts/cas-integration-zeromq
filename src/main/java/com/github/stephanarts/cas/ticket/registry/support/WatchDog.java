@@ -150,7 +150,14 @@ public class WatchDog extends Thread {
                             if(items.pollin(controlSocketIndex)) {
                                 message = ZMsg.recvMsg(controlSocket);
                                 logger.debug("Received STOP message [" + this.nr + "]");
-                                break;
+
+                                for(int s = 0; s < this.sockets.length; ++s) {
+                                    this.sockets[s].setLinger(0);
+                                    this.sockets[s].close();
+                                }
+                                this.controlSocket.close();
+                                this.context.close();
+                                return;
                             }
 
                             if(items.pollin(index)) {
@@ -178,7 +185,14 @@ public class WatchDog extends Thread {
                         if(items.pollin(controlSocketIndex)) {
                             message = ZMsg.recvMsg(controlSocket);
                             logger.debug("Received STOP message [" + this.nr + "]");
-                            break;
+
+                            for(int i = 0; i < this.sockets.length; ++i) {
+                                this.sockets[i].setLinger(0);
+                                this.sockets[i].close();
+                            }
+                            this.controlSocket.close();
+                            this.context.close();
+                            return; /* Exit Thread */
                         }
                     }
                 }
@@ -186,8 +200,6 @@ public class WatchDog extends Thread {
                 break;
             }
         }
-
-        this.controlSocket.close();
     }
 
     /**
@@ -248,17 +260,7 @@ public class WatchDog extends Thread {
         try {
             this.join();
         } catch (final InterruptedException e) {
-            for(int i = 0; i < this.sockets.length; ++i) {
-                this.sockets[i].setLinger(0);
-                this.sockets[i].close();
-            }
-            this.context.close();
             return;
         }
-        for(int i = 0; i < this.sockets.length; ++i) {
-            this.sockets[i].setLinger(0);
-            this.sockets[i].close();
-        }
-        this.context.close();
     }
 }
