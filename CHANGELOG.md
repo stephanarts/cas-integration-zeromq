@@ -2,7 +2,8 @@
 
 Changes:
 
-  - ...
+  - Properly exit the WatchDog thread on all occasions.
+  - Cleanup MBeans upon destruction.
 
 ## 0.0.5 (2015-03-04)
 
