@@ -186,10 +186,6 @@ public class WatchDog extends Thread {
                             message = ZMsg.recvMsg(controlSocket);
                             logger.debug("Received STOP message [" + this.nr + "]");
 
-                            for(int i = 0; i < this.sockets.length; ++i) {
-                                this.sockets[i].setLinger(0);
-                                this.sockets[i].close();
-                            }
                             this.controlSocket.close();
                             this.context.close();
                             return; /* Exit Thread */
