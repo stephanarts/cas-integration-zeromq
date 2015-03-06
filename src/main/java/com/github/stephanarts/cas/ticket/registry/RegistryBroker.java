@@ -17,7 +17,6 @@ package com.github.stephanarts.cas.ticket.registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import java.util.Collection;
 import java.util.ArrayList;
 
@@ -29,6 +28,9 @@ import com.github.stephanarts.cas.ticket.registry.support.JSONRPCException;
 import java.lang.management.ManagementFactory;
 import javax.management.ObjectName;
 import javax.management.MBeanServer;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanRegistrationException;
+
 
 /**
 * Ticket registry implementation that stores tickets via JSON-RPC
@@ -50,6 +52,8 @@ public final class RegistryBroker {
     private final int requestTimeout;
 
     private boolean bootstrapped = false;
+
+    private ObjectName[] mbeans;
 
 
     /**
@@ -79,14 +83,16 @@ public final class RegistryBroker {
         this.requestTimeout = requestTimeout;
 
         this.providers = new RegistryClient[providers.length];
+        this.mbeans    = new ObjectName[providers.length];
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
         for(int i = 0; i < this.providers.length; ++i) {
             client = new RegistryClient(providers[i], pacemaker);
 
-            ObjectName name = new ObjectName("CAS:type=TicketRegistry,id='"+localProviderId+"',client='"+i+"'");
-            mbs.registerMBean(client, name);
+            this.mbeans[i] = new ObjectName(
+                    "CAS:type=TicketRegistry,id='"+localProviderId+"',client='"+i+"'");
+            mbs.registerMBean(client, this.mbeans[i]);
             try {
                 id = client.getProviderId();
                 if (localProviderId.equals(id)) {
@@ -140,8 +146,7 @@ public final class RegistryBroker {
                         this.bootstrapped = false;
                         throw new BootstrapException("ehm...");
                     }
-                }
-                /* Bootstrap success */
+                } /* Bootstrap success */
                 return;
             }
         }
@@ -262,8 +267,16 @@ public final class RegistryBroker {
      * cleanup.
      */
     public void cleanup() {
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         for(int i = 0; i < this.providers.length; ++i) {
             this.providers[i].destroy();
+            try {
+                mbs.unregisterMBean(this.mbeans[i]);
+            } catch (final InstanceNotFoundException e) {
+                logger.warn(e.toString());
+            } catch (final MBeanRegistrationException e) {
+                logger.warn(e.toString());
+            }
         }
     }
 }
