@@ -111,6 +111,14 @@ public class ZMQProviderMBeanTest
         try {
             ZMQProviderMBeanTest.provider.cleanup();
         } catch (Exception e) { }
+
+        try {
+            ZMQProviderMBeanTest.cc.close();
+        } catch (Exception e) { }
+
+        try {
+            ZMQProviderMBeanTest.sc.stop();
+        } catch (Exception e) { }
     }
 
     @Test
@@ -124,6 +132,9 @@ public class ZMQProviderMBeanTest
         Assert.assertEquals("A", mbeanProxy.getProviderId());
     }
 
+    /**
+     * Test if -1 is returned if the method does not exist.
+     */
     @Test
     public void testGetMissingMethodStats() throws Exception {
         Assert.assertEquals(-1, mbeanProxy.getStats("missing"));

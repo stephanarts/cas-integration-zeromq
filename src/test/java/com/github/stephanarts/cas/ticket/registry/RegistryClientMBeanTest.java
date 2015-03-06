@@ -97,6 +97,13 @@ public class RegistryClientMBeanTest
 
     @AfterClass
     public static void afterTest() {
+        try {
+            RegistryClientMBeanTest.cc.close();
+        } catch (Exception e) { }
+
+        try {
+            RegistryClientMBeanTest.sc.stop();
+        } catch (Exception e) { }
     }
 
     /**
