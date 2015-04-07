@@ -445,4 +445,18 @@ public class JSONRPCServerTest
         s.cleanup();
         Assert.assertFalse(s.isAlive());
     }
+
+    @Test
+    public void testInvalidZMQ() throws Exception {
+        JSONRPCServer s = new JSONRPCServer("tcp://localhost:7901");
+        s.start();
+
+        java.net.Socket c = new java.net.Socket("localhost",7901);
+        java.io.PrintWriter out = new java.io.PrintWriter(c.getOutputStream(), true);
+        out.print("BREAK_ZEROMQ");
+        out.flush();
+        c.close();
+
+        s.cleanup();
+    }
 }
