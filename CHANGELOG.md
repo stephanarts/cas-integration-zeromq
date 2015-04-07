@@ -1,8 +1,9 @@
-## 0.0.7
+## 0.0.7-SNAPSHOT
 
 Changes:
 
-  ...
+  - Test handling of invalid input (no ZMQ Socket) via
+    network by JSONRPCServer class.
 
 ## 0.0.6 (2015-03-06)
 
