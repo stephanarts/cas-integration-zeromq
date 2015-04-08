@@ -91,7 +91,7 @@ public final class RegistryBroker {
             client = new RegistryClient(providers[i], pacemaker);
 
             this.mbeans[i] = new ObjectName(
-                    "CAS:type=TicketRegistry,id='"+localProviderId+"',client='"+i+"'");
+                    "CAS:type=TicketRegistry,client='"+i+"'");
             mbs.registerMBean(client, this.mbeans[i]);
             try {
                 id = client.getProviderId();
@@ -106,6 +106,16 @@ public final class RegistryBroker {
         }
 
         if (this.localProvider == null) {
+            for(int i = 0; i < this.providers.length; ++i) {
+                this.providers[i].destroy();
+                try {
+                    mbs.unregisterMBean(this.mbeans[i]);
+                } catch (final InstanceNotFoundException e) {
+                    logger.warn(e.toString());
+                } catch (final MBeanRegistrationException e) {
+                    logger.warn(e.toString());
+                }
+            }
             throw new Exception("Local Provider not found");
         }
 

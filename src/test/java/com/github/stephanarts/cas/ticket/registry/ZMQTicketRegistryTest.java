@@ -143,8 +143,11 @@ public class ZMQTicketRegistryTest
                 500,
                 2000);
 
-        Assert.assertNotNull(registry.getProviderId());
+        String providerId = registry.getProviderId();
 
+        registry.destroy();
+
+        Assert.assertNotNull(providerId);
     }
 
     /**
