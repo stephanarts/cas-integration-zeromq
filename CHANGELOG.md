@@ -2,8 +2,8 @@
 
 Changes:
 
-  - Test handling of invalid input (no ZMQ Socket) via
-    network by JSONRPCServer class.
+  - Properly cleanup client MBeans in unittests.
+  - Make Client MBean JMX Address predictable.
 
 ## 0.0.6 (2015-03-06)
 
