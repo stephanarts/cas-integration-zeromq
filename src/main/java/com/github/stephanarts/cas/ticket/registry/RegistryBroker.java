@@ -38,7 +38,8 @@ import javax.management.MBeanRegistrationException;
 *
 * @author Stephan Arts
 */
-public final class RegistryBroker {
+public final class RegistryBroker
+        implements RegistryBrokerMBean {
 
     /**
      * Logging Class.
@@ -288,5 +289,14 @@ public final class RegistryBroker {
                 logger.warn(e.toString());
             }
         }
+    }
+
+    /**
+     * Return number of providers.
+     *
+     * @return number of provideers.
+     */
+    public int getProviders() {
+        return this.providers.length;
     }
 }
