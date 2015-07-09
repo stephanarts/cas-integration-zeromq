@@ -120,6 +120,7 @@ public class RegistryBrokerMBeanTest
         } catch (Exception e) { }
 
         RegistryBrokerMBeanTest.provider.cleanup();
+        RegistryBrokerMBeanTest.broker.cleanup();
     }
 
     /**
