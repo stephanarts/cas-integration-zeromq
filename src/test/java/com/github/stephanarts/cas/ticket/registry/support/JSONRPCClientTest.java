@@ -109,7 +109,7 @@ public class JSONRPCClientTest
                         message.addString("{\"json-rpc\": \"2.0\", \"error\": {\"code\": -32501, \"message\": \"Test\"}}");
                         message.send(this.socket);
                     }
-                    if (methodName.equals("internal-error")) {
+                    if (methodName.equals("server-error")) {
                         message.addString("{\"json-rpc\": \"2.0\", \"deadbeef\": { \"OK\":\"...\"}}");
                         message.send(this.socket);
                     }
@@ -226,15 +226,15 @@ public class JSONRPCClientTest
     }
 
     /**
-     * testInternalErrorResponse
+     * testInvalidErrorResponse
      *
      * Goal:
-     * Test handling of an internal-error response.
+     * Test handling of an invalid error response.
      *
      */
     @Test
-    public void testInternalErrorResponse() throws Exception {
-        logger.info("testInternalErrorResponse");
+    public void testInvalidErrorResponse() throws Exception {
+        logger.info("testInvalidErrorResponse");
 
         JSONRPCClient c = new JSONRPCClient(JSONRPCClientTest.connectURI);
         JSONObject params = new JSONObject();
@@ -243,11 +243,11 @@ public class JSONRPCClientTest
         c.connect();
 
         try {
-            result = c.call("internal-error", params);
+            result = c.call("server-error", params);
             Assert.assertNotNull(result);
         } catch (final JSONRPCException e) {
             c.destroy();
-            Assert.assertEquals(-32603, e.getCode());
+            Assert.assertEquals(-32700, e.getCode());
             return;
         }
 

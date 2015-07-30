@@ -187,7 +187,7 @@ public class JSONRPCClient {
                     error = response.getJSONObject("error");
                     throw new JSONRPCException(error.getInt("code"), error.getString("message"));
                 }
-                throw new JSONRPCException(-32603, "Internal error");
+                throw new JSONRPCException(-32700, "Parse error");
             } else {
                 logger.debug("Failed to get reply from {}", this.connectUri);
 
