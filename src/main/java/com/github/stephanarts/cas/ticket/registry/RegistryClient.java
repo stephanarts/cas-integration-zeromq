@@ -274,4 +274,12 @@ public class RegistryClient extends JSONRPCClient
         return this.getAvailable();
     }
 
+    /**
+     * MBean Interface for provider URI.
+     *
+     * @return the provider URI;
+     */
+    public final String getProviderURI() {
+        return this.getConnectURI();
+    }
 }

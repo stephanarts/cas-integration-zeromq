@@ -24,7 +24,14 @@ public interface RegistryClientMBean {
     /**
      * Return Provider Availability.
      *
-     * @return of tickets stored.
+     * @return provider availability.
      */
     boolean getProviderAvailable();
+
+    /**
+     * Return Provider URI.
+     *
+     * @return provider URI.
+     */
+    String getProviderURI();
 }
