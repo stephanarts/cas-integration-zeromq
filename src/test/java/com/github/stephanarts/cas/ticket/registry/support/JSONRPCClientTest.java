@@ -109,6 +109,10 @@ public class JSONRPCClientTest
                         message.addString("{\"json-rpc\": \"2.0\", \"error\": {\"code\": -32501, \"message\": \"Test\"}}");
                         message.send(this.socket);
                     }
+                    if (methodName.equals("internal-error")) {
+                        message.addString("{\"json-rpc\": \"2.0\", \"deadbeef\": { \"OK\":\"...\"}}");
+                        message.send(this.socket);
+                    }
                     if (methodName.equals("timeout")) {
                     }
                     logger.error("METHOD: "+methodName);
@@ -189,7 +193,7 @@ public class JSONRPCClientTest
         }
 
         Assert.fail("No Exception Thrown");
-    } 
+    }
 
     /**
      * testErrorResponse
@@ -215,6 +219,35 @@ public class JSONRPCClientTest
         } catch (final JSONRPCException e) {
             Assert.assertEquals(e.getCode(), -32501);
             c.destroy();
+            return;
+        }
+
+        Assert.fail("No Exception Thrown");
+    }
+
+    /**
+     * testInternalErrorResponse
+     *
+     * Goal:
+     * Test handling of an internal-error response.
+     *
+     */
+    @Test
+    public void testInternalErrorResponse() throws Exception {
+        logger.info("testInternalErrorResponse");
+
+        JSONRPCClient c = new JSONRPCClient(JSONRPCClientTest.connectURI);
+        JSONObject params = new JSONObject();
+        JSONObject result = null;
+
+        c.connect();
+
+        try {
+            result = c.call("internal-error", params);
+            Assert.assertNotNull(result);
+        } catch (final JSONRPCException e) {
+            c.destroy();
+            Assert.assertEquals(-32603, e.getCode());
             return;
         }
 
