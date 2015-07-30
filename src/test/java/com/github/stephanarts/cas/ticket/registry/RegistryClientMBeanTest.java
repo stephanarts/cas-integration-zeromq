@@ -117,4 +117,12 @@ public class RegistryClientMBeanTest
         RegistryClientMBeanTest.client.setAvailable(true);
         Assert.assertEquals(true, mbeanProxy.getProviderAvailable());
     }
+
+    /**
+     * Test if the URI can be read via the MBean
+     */
+    @Test
+    public void testGetProviderURI() throws Exception {
+        Assert.assertTrue("tcp://localhost:9898".equals(mbeanProxy.getProviderURI()));
+    }
 }
