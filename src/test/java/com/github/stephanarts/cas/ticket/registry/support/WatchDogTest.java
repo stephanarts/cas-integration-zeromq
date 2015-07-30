@@ -62,13 +62,89 @@ public class WatchDogTest
      */
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    static String connectURI = new String("tcp://localhost:6666");
+
+    private static ResponseServer server;
+
+    private static class ResponseServer extends Thread {
+        /**
+         * Logging Class.
+         */
+        protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+        Context context;
+        Socket  socket;
+
+        public final void run() {
+
+            ZMsg   message;
+            ZFrame body;
+            String msg;
+            String methodName;
+            JSONObject req;
+
+            logger.debug("RUN");
+            Poller items = new Poller(1);
+
+            items.register(this.socket, Poller.POLLIN);
+
+            logger.debug("poll");
+            while(!Thread.currentThread().isInterrupted()) {
+                items.poll();
+                logger.trace("poll-res");
+
+                if(items.pollin(0)) {
+                    message = ZMsg.recvMsg(this.socket);
+                    body = message.getLast();
+
+                    byte[] d = body.getData();
+                    if (d.length == 1 && d[0] == 0x0) {
+                        /* Send pong */
+                        message.removeLast();
+                        message.addLast(new byte[] {0x0});
+                        message.send(this.socket);
+                    } else {
+                        msg = new String(body.getData());
+
+                        req = new JSONObject(msg);
+
+                        methodName = req.getString("method");
+                        message.removeLast();
+                        if (methodName.equals("valid")) {
+                            message.addString("{\"json-rpc\": \"2.0\", \"result\": { \"OK\":\"...\"}}");
+                            message.send(this.socket);
+                        }
+
+                        logger.error("METHOD: "+methodName);
+                    }
+                }
+            }
+
+        }
+
+        public final void start() {
+            this.context = ZMQ.context(1);
+            this.socket = context.socket(ZMQ.ROUTER);
+
+            this.socket.bind(WatchDogTest.connectURI);
+
+            logger.debug("START");
+            super.start();
+        }
+
+    }
+
     @BeforeClass
     public static void beforeTest() {
+        server = new ResponseServer();
+        server.start();        
     }
 
     @AfterClass
     public static void afterTest() {
+        server.interrupt();
     }
+
 
     @Test
     public void testConstructor() throws Exception {
@@ -154,7 +230,7 @@ public class WatchDogTest
         boolean available;
 
         WatchDog w = new WatchDog();
-        JSONRPCClient[] c = { new JSONRPCClient("tcp://localhost:6666", null)};
+        JSONRPCClient[] c = { new JSONRPCClient(connectURI, null)};
 
         w.setClients(c);
         
@@ -171,6 +247,17 @@ public class WatchDogTest
             Assert.fail("Watchdog did not set availability to false");
         }
 
+        c[0].connect();
+
+        Thread.sleep(1000);
+        available = c[0].getAvailable();
+        if (available == false) {
+            c[0].disconnect();
+            w.cleanup();
+            Assert.fail("Watchdog did not set availability to true");
+        }
+
+        c[0].disconnect();
         w.cleanup();
     }
 
