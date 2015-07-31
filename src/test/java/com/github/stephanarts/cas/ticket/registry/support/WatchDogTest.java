@@ -64,8 +64,6 @@ public class WatchDogTest
 
     static String connectURI = new String("tcp://localhost:6666");
 
-    private static ResponseServer server;
-
     private static class ResponseServer extends Thread {
         /**
          * Logging Class.
@@ -136,13 +134,12 @@ public class WatchDogTest
 
     @BeforeClass
     public static void beforeTest() {
-        server = new ResponseServer();
-        server.start();        
+
     }
 
     @AfterClass
     public static void afterTest() {
-        server.interrupt();
+
     }
 
 
@@ -228,6 +225,7 @@ public class WatchDogTest
     @Test
     public void testFailedHeartbeat() throws Exception {
         boolean available;
+        ResponseServer server = new ResponseServer();
 
         WatchDog w = new WatchDog();
         JSONRPCClient[] c = { new JSONRPCClient(connectURI, null)};
@@ -247,6 +245,8 @@ public class WatchDogTest
             Assert.fail("Watchdog did not set availability to false");
         }
 
+        server.start();        
+
         c[0].connect();
 
         Thread.sleep(1000);
@@ -254,11 +254,13 @@ public class WatchDogTest
         if (available == false) {
             c[0].disconnect();
             w.cleanup();
+            server.interrupt();
             Assert.fail("Watchdog did not set availability to true");
         }
 
         c[0].disconnect();
         w.cleanup();
+        server.interrupt();
     }
 
 }
