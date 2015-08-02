@@ -175,4 +175,42 @@ public class ZMQTicketRegistryTest
             logger.error(threadArray[i].getName()+" _ "+threadArray[i].getState().toString());
         }
     }
+
+    @Test
+    public void testUpdate() throws Exception {
+        final String oldTicketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket oldTicket = mock(ServiceTicket.class, withSettings().serializable());
+        when(oldTicket.getId()).thenReturn(oldTicketId);
+        when(oldTicket.getCountOfUses()).thenReturn(0);
+
+        final String newTicketId = "ST-1234567890ABCDEFGHIJKL-crud";
+        final ServiceTicket newTicket = mock(ServiceTicket.class, withSettings().serializable());
+        when(newTicket.getId()).thenReturn(newTicketId);
+        when(newTicket.getCountOfUses()).thenReturn(42);
+
+        String[] addresses = {"tcp://localhost:5555"};
+        ZMQTicketRegistry registry = new ZMQTicketRegistry(
+                addresses,
+                "localhost",
+                5555,
+                1500,
+                500,
+                2000);
+
+        registry.addTicket(oldTicket);
+
+        ServiceTicket ticketFromRegistry = (ServiceTicket) registry.getTicket(oldTicketId);
+        Assert.assertNotNull(ticketFromRegistry);
+        Assert.assertEquals(0, ticketFromRegistry.getCountOfUses());
+
+        registry.updateTicket(newTicket);
+
+        ticketFromRegistry = (ServiceTicket) registry.getTicket(oldTicketId);
+        Assert.assertNotNull(ticketFromRegistry);
+        Assert.assertEquals(42, ticketFromRegistry.getCountOfUses());
+
+        registry.destroy();
+
+        registry = null;
+    }
 }
