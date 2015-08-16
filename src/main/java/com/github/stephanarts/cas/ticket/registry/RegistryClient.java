@@ -275,6 +275,15 @@ public class RegistryClient extends JSONRPCClient
     }
 
     /**
+     * MBean Interface for provider responseTime.
+     *
+     * @return the responseTime to heartbeat messages in milliseconds;
+     */
+    public final long getProviderResponseTime() {
+        return this.getResponseTime();
+    }
+
+    /**
      * MBean Interface for provider URI.
      *
      * @return the provider URI;

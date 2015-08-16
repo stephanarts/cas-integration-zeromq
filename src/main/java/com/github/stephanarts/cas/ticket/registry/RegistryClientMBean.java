@@ -29,6 +29,13 @@ public interface RegistryClientMBean {
     boolean getProviderAvailable();
 
     /**
+     * Return Provider responseTime.
+     *
+     * @return provider responseTime.
+     */
+    long getProviderResponseTime();
+
+    /**
      * Return Provider URI.
      *
      * @return provider URI.

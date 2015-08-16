@@ -77,6 +77,16 @@ public class JSONRPCClient {
     private boolean available = true;
 
     /**
+     * responseTime, indicates the time it takes
+     * the server to respond to a watchdog 'ping'.
+     *
+     * The value of this variable is only reliable is available = true.
+     *
+     * It can be set by a watchdog process.
+     */
+    private long responseTime = 0;
+
+    /**
      * Create a JSONRPCClient object.
      *
      * @param connectUri   The URI to connect to
@@ -229,8 +239,9 @@ public class JSONRPCClient {
     /**
      * Set if the server is available.
      *
-     * @param available availability of peer,
-     *                  should be used by watchdog thread.
+     * Should be used by watchdog thread.
+     *
+     * @param available - the availability of peer
      */
     public final void setAvailable(final boolean available) {
         if (this.available != available) {
@@ -241,6 +252,26 @@ public class JSONRPCClient {
                     +available);
         }
         this.available = available;
+    }
+
+    /**
+     * Return the responseTime.
+     *
+     * @return responseTime.
+     */
+    public final long getResponseTime() {
+        return this.responseTime;
+    }
+
+    /**
+     * Set the response-time, (how long it takes to get a response).
+     *
+     * This should only be used by the watchdog thread.
+     *
+     * @param responseTime
+     */
+    public final void setResponseTime(final long responseTime) {
+        this.responseTime = responseTime;
     }
 
     /**

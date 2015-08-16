@@ -209,9 +209,12 @@ public class WatchDogTest
     public void testFailedHeartbeat() throws Exception {
         boolean available;
         ResponseServer server = new ResponseServer();
-
         WatchDog w = new WatchDog();
         JSONRPCClient[] c = { new JSONRPCClient(connectURI, null)};
+        long responseTime = 0;
+
+        responseTime = c[0].getResponseTime();
+        Assert.assertEquals(0, responseTime);
 
         w.setClients(c);
         
@@ -240,6 +243,9 @@ public class WatchDogTest
             server.interrupt();
             Assert.fail("Watchdog did not set availability to true");
         }
+
+        responseTime = c[0].getResponseTime();
+        Assert.assertNotEquals(0, responseTime);
 
         c[0].disconnect();
         w.cleanup();

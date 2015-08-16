@@ -110,12 +110,24 @@ public class RegistryClientMBeanTest
      * Test if the availability-flag can be read via the MBean.
      */
     @Test
-    public void testGetAvailable() throws Exception {
+    public void testGetProviderAvailable() throws Exception {
         RegistryClientMBeanTest.client.setAvailable(false);
         Assert.assertEquals(false, mbeanProxy.getProviderAvailable());
 
         RegistryClientMBeanTest.client.setAvailable(true);
         Assert.assertEquals(true, mbeanProxy.getProviderAvailable());
+    }
+
+    /**
+     * Test if the response-time can be read via the MBean.
+     */
+    @Test
+    public void testGetProviderResponseTime() throws Exception {
+        RegistryClientMBeanTest.client.setResponseTime(1234);
+        Assert.assertEquals(1234, mbeanProxy.getProviderResponseTime());
+
+        RegistryClientMBeanTest.client.setResponseTime(0);
+        Assert.assertEquals(0, mbeanProxy.getProviderResponseTime());
     }
 
     /**

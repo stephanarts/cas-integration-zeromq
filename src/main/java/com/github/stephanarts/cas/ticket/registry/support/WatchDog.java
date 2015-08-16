@@ -142,10 +142,15 @@ public class WatchDog extends Thread {
                     if (this.sockets.length > 0) {
                         for(int i = 0; i < this.sockets.length; ++i) {
 
+                            final long startTime = System.currentTimeMillis();
+                            final long endTime;
+
                             int index = items.register(this.sockets[i], Poller.POLLIN);
+
                             this.sockets[i].send(new byte[] {0x0}, 0);
 
                             items.poll(this.heartbeatTimeout);
+                            endTime = System.currentTimeMillis();
 
                             if(items.pollin(controlSocketIndex)) {
                                 message = ZMsg.recvMsg(controlSocket);
@@ -165,6 +170,9 @@ public class WatchDog extends Thread {
                                 this.clients[i].setAvailable(true);
 
                                 items.unregister(this.sockets[i]);
+
+                                /* Store the response-time */
+                                this.clients[i].setResponseTime(endTime - startTime);
                             } else {
                                 logger.debug("Missed Heartbeat");
                                 items.unregister(this.sockets[i]);
