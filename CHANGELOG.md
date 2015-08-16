@@ -1,4 +1,18 @@
-## 0.0.7-SNAPSHOT
+## 0.0.9-SNAPSHOT
+
+Changes:
+
+  - Measure responseTime of WatchDog ping.
+  - Remove broken unittest.
+
+## 0.0.8 (2015-08-03)
+
+Changes:
+
+  - Increase code-coverage of unittests.
+  - Implement getProviderURI MBean interface.
+
+## 0.0.7 (2015-07-11)
 
 Changes:
 
