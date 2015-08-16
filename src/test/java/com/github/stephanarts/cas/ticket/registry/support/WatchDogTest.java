@@ -158,23 +158,6 @@ public class WatchDogTest
     }
 
     @Test
-    @Ignore
-    public void testSleepInterrupt() throws Exception {
-        WatchDog w = new WatchDog();
-
-        //PowerMockito.mockStatic(Thread.class);
-        //PowerMockito.doThrow(new InterruptedException()).when(Thread.class);
-        PowerMockito.spy(Thread.class);
-        PowerMockito.doThrow(new InterruptedException()).when(Thread.class);
-        Thread.sleep(anyLong());
-
-        w.start();
-        w.cleanup();
-
-        Assert.assertFalse(w.isAlive());
-    }
-
-    @Test
     public void testDefaultHeartbeatInterval() throws Exception {
         WatchDog w = new WatchDog();
         w.start();
