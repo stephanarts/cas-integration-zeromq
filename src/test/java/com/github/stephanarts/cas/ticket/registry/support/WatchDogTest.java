@@ -47,6 +47,7 @@ import static org.mockito.Matchers.*;
 
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
@@ -54,6 +55,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(WatchDog.class)
+@PowerMockIgnore("javax.management.*")
 public class WatchDogTest 
 {
 
