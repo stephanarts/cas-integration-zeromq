@@ -217,8 +217,8 @@
    </build>
 
   <properties>
-    <project.build.sourceVersion>1.8</project.build.sourceVersion>
-    <project.build.targetVersion>1.8</project.build.targetVersion>
+    <project.build.sourceVersion>1.7</project.build.sourceVersion>
+    <project.build.targetVersion>1.7</project.build.targetVersion>
     <powermock.version>1.5.6</powermock.version>
   </properties>
 
